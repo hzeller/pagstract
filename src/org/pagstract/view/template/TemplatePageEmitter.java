@@ -56,7 +56,8 @@ public class TemplatePageEmitter implements Visitor {
     protected final NameResolver     _nameResolver;
     protected final TemplateResolver _templateResolver;
     protected final ActionUrlProvider _urlProvider;
-    
+    protected final RendererResolver  _rendererResolver;
+
     protected Device _out; //not final, since JSTemplatePageEmitter replaces it
     protected final String _parentResource;
 
@@ -72,7 +73,8 @@ public class TemplatePageEmitter implements Visitor {
                                Device out, 
                                NameResolver nameResolver,
                                TemplateResolver templateResolver) {
-        this(resourceName, out, nameResolver, templateResolver, null, null);
+        this(resourceName, out, nameResolver, templateResolver, null, null,
+             new RendererResolver());
     }
     
     public TemplatePageEmitter(String resourceName,
@@ -80,7 +82,8 @@ public class TemplatePageEmitter implements Visitor {
                                NameResolver nameResolver,
                                TemplateResolver templateResolver,
                                ActionUrlProvider urlProvider,
-                               ResourceResolver resourceResolver) 
+                               ResourceResolver resourceResolver,
+                               RendererResolver rendererResolver)
     {
         _out = out;
         _nameResolver = nameResolver;
@@ -88,6 +91,7 @@ public class TemplatePageEmitter implements Visitor {
         _resourceResolver = resourceResolver;
         _parentResource = resourceName;
         _urlProvider = urlProvider;
+        _rendererResolver = rendererResolver;
     }
 
     void setFormParameterCollector(Set s, FormNode formNode) {
@@ -242,7 +246,7 @@ public class TemplatePageEmitter implements Visitor {
     }
 
     public void visit(ValueNode node) throws Exception {
-        ComponentRenderer renderer = new ValueRenderer();
+        ComponentRenderer renderer = new ValueRenderer(_rendererResolver);
         Object value = resolveNamedObject(node);
         renderer.render(this, node, value, _out);
     }

@@ -198,8 +198,10 @@ CaseList ::=
 ValueTag ::= 
           ValueStart:v IgnoredSequence ValueEnd:e 
                        {: RESULT= new ValueNode( v.getModelName(), v.getRaw(),
+                                                  v.getAttribute("pma:format"),
                                                  v.getFilePosition()); :}
         | ValueSimple:v {: RESULT= new ValueNode( v.getModelName(), v.getRaw(),
+                                                  v.getAttribute("pma:format"),
                                                   v.getFilePosition()); :} 
         ;
 

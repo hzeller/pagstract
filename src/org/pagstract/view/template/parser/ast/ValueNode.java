@@ -16,9 +16,12 @@ import org.pagstract.view.template.parser.scanner.FilePosition;
 
 public final class ValueNode extends AbstractNamedNode {
     private final boolean _raw;
+    private final String _format;
 
-    public ValueNode( String model_name, String rawFlag, FilePosition fpos) {
+    public ValueNode( String model_name, String rawFlag, String format,
+                      FilePosition fpos) {
         super(model_name, fpos);
+        _format = format;
         boolean raw;
         if (rawFlag == null) {
             raw = false;
@@ -49,6 +52,10 @@ public final class ValueNode extends AbstractNamedNode {
 
     public boolean writeAsRaw() {
         return _raw;
+    }
+
+    public String getFormat() {
+        return _format;
     }
 }
 

@@ -55,10 +55,12 @@ public class JSTemplatePageEmitter extends TemplatePageEmitter {
                                  StringBuffer functionCode,
                                  Map nodeFunctions, 
                                  ActionUrlProvider urlProvider,
-                                 ResourceResolver resourceResolver) {
+                                 ResourceResolver resourceResolver,
+                                 RendererResolver rendererResolver)
+    {
         // consider aggregation..
         super(resourceName, out, nameResolver, templateResolver,
-              urlProvider, resourceResolver);
+              urlProvider, resourceResolver, rendererResolver);
         _origDevice = out;
         _functionCode = functionCode;
         _nodeFunctions = nodeFunctions;

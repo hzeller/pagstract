@@ -30,6 +30,7 @@ import org.pagstract.view.namespace.Namespace;
 import org.pagstract.view.template.TemplatePageEmitter;
 import org.pagstract.view.template.TemplateResolver;
 import org.pagstract.view.template.ResourceResolver;
+import org.pagstract.view.template.RendererResolver;
 
 /**
  * A super-simple HTTP-Server that answers any request
@@ -138,7 +139,8 @@ public class TemplateHttpServer {
             new TemplatePageEmitter(_docRoot.getCanonicalPath() 
                                     + "/" + _templatePath + "/",
                                     out, resolver, _templateResolver,
-                                    null, _resourceResolver);
+                                    null, _resourceResolver,
+                                    new RendererResolver());
         long start = System.currentTimeMillis();
         _currentTemplate.getTemplateRootNode().accept(emitter);
         System.err.println("RenderTime: " 

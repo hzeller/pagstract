@@ -16,6 +16,7 @@ import java.io.IOException;
 
 import org.pagstract.io.Device;
 import org.pagstract.model.SingleValueModel;
+import org.pagstract.view.ObjectRenderer;
 import org.pagstract.view.template.parser.ast.TemplateNode;
 import org.pagstract.view.template.parser.ast.ValueNode;
 import org.pagstract.view.template.parser.ast.Visitor;
@@ -25,6 +26,12 @@ import org.pagstract.view.template.parser.ast.Visitor;
  * out components.
  */
 public class ValueRenderer implements ComponentRenderer {
+    private final RendererResolver _rendererResolver;
+
+    public ValueRenderer(RendererResolver rendererResolver) {
+        _rendererResolver = rendererResolver;
+    }
+
     public void render(Visitor renderVisitor,
                        TemplateNode node, 
                        Object value, Device out) 
@@ -38,11 +45,15 @@ public class ValueRenderer implements ComponentRenderer {
         }
         String renderText;
         if (value instanceof SingleValueModel) {
+            // TODO: add a renderer for SingleValueModel
             SingleValueModel model = (SingleValueModel) value;
             renderText = model.getValue();
         }
         else {
-            renderText = value.toString();
+            final ObjectRenderer renderer = _rendererResolver.findRendererFor(value.getClass());
+            renderText = renderer.renderObject(valNode.getModelName(),
+                                               valNode.getFormat(),
+                                               value);
         }
 
         if (renderText == null) {

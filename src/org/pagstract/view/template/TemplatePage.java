@@ -36,13 +36,15 @@ class TemplatePage implements Page {
     private final PageModel _model;
     private final TemplateNode _rootNode;
     private final Device _out;
+    private final RendererResolver _rendererResolver;
 
     TemplatePage(String resourceName,
                  Namespace rootNamespace, TemplateResolver templateResolver,
                  PageModel model,
                  TemplateNode rootNode,
                  Device out, ActionUrlProvider urlProvider,
-                 ResourceResolver resourceResolver) 
+                 ResourceResolver resourceResolver,
+                 RendererResolver rendererResolver)
     {
         NameResolver resolver = new NameResolver(rootNamespace);
         //_templatePageEmitter = new TemplatePageEmitter(out, resolver);
@@ -52,7 +54,8 @@ class TemplatePage implements Page {
                                                       resolver,
                                                       templateResolver,
                                                       urlProvider,
-                                                      resourceResolver);
+                                                      resourceResolver,
+                                                      rendererResolver);
         /*
          FIXME: this must be optimized; the JS does not change.
         _templatePageEmitter1= new JavaScriptGenerator(code, functionMappings);
@@ -68,14 +71,15 @@ class TemplatePage implements Page {
         _out = out;
         _rootNode = rootNode;
         _model = model;
+        _rendererResolver = rendererResolver;
     }
-
+    
     TemplatePage createCopy(TemplateResolver resolver, Device out,
                             ActionUrlProvider urlProvider, 
                             ResourceResolver resourceResolver) {
         return new TemplatePage(_pageName, _rootNamespace,
                                 resolver, _model, _rootNode, out, urlProvider,
-                                resourceResolver);
+                                resourceResolver, _rendererResolver);
     }
 
     /**

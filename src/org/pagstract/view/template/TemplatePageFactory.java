@@ -35,6 +35,7 @@ public class TemplatePageFactory implements PageFactory {
     protected final TemplateResolver _resolver;
     protected final ActionUrlProvider _urlProvider; 
     protected final ResourceResolver _resourceResolver;
+    protected final RendererResolver _rendererResolver;
 
     /**
      * @deprecated call with explicit resolver instead.
@@ -48,6 +49,7 @@ public class TemplatePageFactory implements PageFactory {
         _resolver = cache;
         _urlProvider = null;
         _resourceResolver = null;
+        _rendererResolver = new RendererResolver();
     }
 
     public TemplatePageFactory(Device out, String basePath,
@@ -75,7 +77,8 @@ public class TemplatePageFactory implements PageFactory {
                                ActionUrlProvider urlProvider,
                                ResourceResolver resourceResolver) {
         this(out, new PrefixResourceResolver(basePath),
-             resolver, urlProvider, resourceResolver);
+             resolver, urlProvider, resourceResolver,
+             new RendererResolver());
     }
 
     /**
@@ -99,7 +102,8 @@ public class TemplatePageFactory implements PageFactory {
                                ResourceResolver templatePathResolver,
                                TemplateResolver resolver,
                                ActionUrlProvider urlProvider,
-                               ResourceResolver resourceResolver)
+                               ResourceResolver resourceResolver,
+                               RendererResolver rendererResolver)
         
     {
         _out = out;
@@ -107,6 +111,7 @@ public class TemplatePageFactory implements PageFactory {
         _resolver = resolver;
         _urlProvider = urlProvider;
         _resourceResolver = resourceResolver;
+        _rendererResolver = rendererResolver;
     }
     
     /**
@@ -135,7 +140,7 @@ public class TemplatePageFactory implements PageFactory {
         TemplateNode rootNode = _resolver.resolveTemplate(filename);
         return new TemplatePage(filename, rootNamespace, _resolver, model, 
                                 rootNode, _out, _urlProvider, 
-                                _resourceResolver);
+                                _resourceResolver, _rendererResolver);
     }
     
     /**
