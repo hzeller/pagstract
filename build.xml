@@ -88,6 +88,22 @@
         </jar>
      </target>
 
+     <target name="complete-jar" depends="compile" 
+             description="jarfile with all external references included">
+        <jar jarfile="${build}/run-${pkgbase}.jar">
+           <fileset dir="${build.classes}">
+              <include name="**/*.class"/>
+              <include name="**/*.png"/>
+           </fileset>
+           <zipfileset src="${extern.libdir}/javacup-runtime-0.10j.jar"/>
+	   <manifest>
+	      <attribute name="Created-By" value="Henner Zeller"/>
+	      <attribute name="Main-Class" 
+	                 value="org.pagstract.ide.PageModelIde"/>
+	   </manifest>
+        </jar>
+     </target>
+
     <target name="test-compile" depends="compile"
             description="compile test program and create page model jar">
         <javac srcdir="test" destdir="${build.test}"
