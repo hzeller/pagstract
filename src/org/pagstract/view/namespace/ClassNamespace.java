@@ -148,10 +148,25 @@ public class ClassNamespace implements Namespace {
             for( int i=0; i < methods.length; ++i) {
                 Method m = methods[i];
                 String name = m.getName();
-                if (name.length() <= 3 || !name.startsWith("get")) {
+                String getterName;
+                
+                if (m.getReturnType() == void.class) {
                     continue;
                 }
-                String getterName = name.substring(3);
+                
+                if ((m.getReturnType() == boolean.class
+                     || m.getReturnType() == Boolean.class)
+                    && name.length() > 2 
+                    && name.startsWith("is")) {
+                    getterName = name.substring(2);
+                }
+                else if (name.length() > 3 && name.startsWith("get")) {
+                    getterName = name.substring(3);
+                }
+                else {
+                    continue;
+                }
+                
                 getterName = (getterName.substring(0, 1).toLowerCase()
                               + getterName.substring(1));
                 if ("class".equals(getterName)) {
