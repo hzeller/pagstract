@@ -17,11 +17,28 @@ import org.pagstract.view.template.parser.scanner.TemplateToken;
 public final class IteratorNode extends AbstractNamedNode {
     private final TemplateToken    _tag;
     private final ListContentContainer _contentElements;
+    private final Integer _startPos;
+    private final Integer _count;
 
     public IteratorNode( TemplateToken tag, ListContentContainer content) {
         super(tag.getModelName(), tag.getFilePosition());
         _contentElements = content;
         _tag = tag;
+        _startPos = parseInt(tag, "start");
+        _count = parseInt(tag, "count");
+    }
+
+    private Integer parseInt(TemplateToken tag, String name) {
+        String attr = tag.getAttribute(name);
+        if (attr == null) return null;
+        Integer result = null;
+        try {
+            result = new Integer(attr);
+        }
+        catch (Exception e) {
+            throw new IllegalArgumentException(tag.getFilePosition() + ": invalid number given in '" + name + "' attribute; got '" + attr + "' but expected a number");
+        }
+        return result;
     }
 
     public IteratorNode( TemplateToken tag, TemplateNode content )
@@ -31,6 +48,14 @@ public final class IteratorNode extends AbstractNamedNode {
 
     public IteratorNode( TemplateToken tag ) {
         this(tag, (TemplateNode) null);
+    }
+
+    public Integer getStartPos() {
+        return _startPos;
+    }
+
+    public Integer getCount() {
+        return _count;
     }
 
     public TemplateNode getHeader() {
