@@ -1,0 +1,192 @@
+<!-- $Id$ -->
+<project name="Pagstract - web application view model"
+         default="compile" basedir=".">
+     <!-- properties -->
+     <property name="version"              value="0.33" />
+     <property name="src"                  value="src" />
+     <property name="bin"                  value="bin" />
+     <property name="lib"                  value="lib" />
+     <property name="build"                value="build" />
+     <property name="javadoc.home"         value="${build}/javadoc"/>
+     <property name="build.src"            value="${build}/src" />
+     <property name="build.test"           value="${build}/test" />
+     <property name="build.classes"        value="${build}/classes" />
+     <property name="pkgbase"              value="pagstract-${version}" />
+
+     <property name="tgram-path"       value="org/pagstract/view/template" />
+     <property name="tgram-home"       value="${src}/${tgram-path}" />
+     <property name="tgram-generate"   value="${build.src}/${tgram-path}" />
+
+     <property name="build.compiler"           value="modern"/>
+     <property name="build.compiler.pedantic"  value="true"/>
+     <property name="build.compiler.emacs" value="true" />
+     <property name="extern.libdir"            value="../lib/extern"/>
+
+     <!-- libs needed for compilation -->
+     <fileset dir="${extern.libdir}" defaultexcludes="yes" id="build.libs"> 
+          <include name="jsdk-2.3.jar" /> <!-- ServletDevice -->
+	  <include name="javacup-runtime-0.10j.jar"/>
+          <include name="commons-logging-api-1.0.1.jar"/>
+     </fileset>
+
+     <path id="build.classpath">
+         <fileset refid="build.libs"/>
+     </path>
+  
+     <target name="prepare">
+        <mkdir dir="${build}" />
+        <mkdir dir="${build.src}" />
+        <mkdir dir="${javadoc.home}" />
+        <mkdir dir="${tgram-generate}" />
+        <mkdir dir="${build.classes}" />
+        <mkdir dir="${build.test}" />
+     </target>
+
+     <!-- the following ten (10) lines would be two (2) readable lines 
+          in make... -->
+     <target name="check-parser-depend">
+         <uptodate property="parser.cup-newer-than-parser.java"
+              targetfile="parser/TemplateParser.cup">
+            <srcfiles dir="${build.src}" includes="**/*.java"/>
+        </uptodate>
+     </target>
+     <target name="parser-gen" depends="prepare,check-parser-depend"
+             if="parser.cup-newer-than-parser.java">
+          <exec dir="." executable="parser/mkparser.sh"/>
+     </target>
+
+     <target name="compile" depends="prepare, parser-gen"
+             description="compile pagstract">
+        <javac srcdir="${build.src}:${src}" destdir="${build.classes}"
+ 	       debug="true">
+	   <classpath refid="build.classpath" />
+	</javac>
+        <copy todir="${build.classes}">
+           <fileset dir="${src}">
+               <include name="org/pagstract/ide/icons/*.png"/>
+	   </fileset>
+        </copy>
+     </target>
+
+     <target name="jar" depends="compile" 
+             description="generate pagstract jar file">
+        <jar jarfile="${build}/${pkgbase}.jar">
+           <fileset dir="${build.classes}">
+              <include name="**/*.class"/>
+              <include name="**/*.png"/>
+           </fileset>
+	   <fileset dir="${extern.libdir}">
+	       <include name="javacup-runtime-0.10j.jar"/>
+	   </fileset>
+	   <manifest>
+	      <attribute name="Created-By" value="Henner Zeller"/>
+	      <attribute name="Main-Class" 
+	                 value="org.pagstract.ide.PageModelIde"/>
+	      <attribute name="Class-Path"
+	                 value="javacup-runtime-0.10j.jar"/>
+	   </manifest>
+        </jar>
+     </target>
+
+    <target name="test-compile" depends="compile"
+            description="compile test program and create page model jar">
+        <javac srcdir="test" destdir="${build.test}"
+	       deprecation="yes" debug="true">
+            <classpath>
+                <fileset refid="build.libs"/>
+                <pathelement location="${build.classes}"/>
+            </classpath>
+        </javac>
+	<mkdir dir="${build.test}/META-INF/"/>
+	<copy file="test/models" todir="${build.test}/META-INF"/>
+        <jar jarfile="${build.test}/testmodel.jar">
+           <fileset dir="${build.test}">
+              <include name="META-INF/models"/>
+              <include name="SamplePage.class"/>
+              <include name="Region.class"/>
+              <include name="AddressBean.class"/>
+              <include name="Reiseziel.class"/>
+           </fileset>
+        </jar>
+    </target>
+
+    <target name="test-run" depends="test-compile"
+            description="run the test program and generate test/test-out.html">
+        <java classname="PagstractTest" dir="test" fork="yes">
+	    <jvmarg value="-server"/>
+            <classpath>
+                <pathelement path="${build.classes}"/>
+                <pathelement path="${build.test}"/>
+                <fileset refid="build.libs"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="run-ide" depends="test-compile"
+            description="run the IDE for the test page models">
+        <java classname="org.pagstract.ide.PageModelIde" fork="yes">
+            <classpath>
+                <pathelement path="${build.classes}"/>
+                <fileset refid="build.libs"/>
+            </classpath>
+	    <arg value="${build.test}/testmodel.jar"/>
+	    <arg value="test"/>
+        </java>
+    </target>
+    
+     <target name="dist" depends="clean" description="create distribution tar">
+       <mkdir dir="${pkgbase}" />
+       <copy todir="${pkgbase}">
+          <fileset dir=".">
+            <include name="${src}/**" />
+            <include name="etc/**" />
+            <include name="demo/**" />
+            <include name="build.xml" />
+            <exclude name="**/CVS" />
+            <exclude name="**/*.class" />
+            <exclude name="**/*.jar" />
+            <exclude name="**/*~" />
+          </fileset>
+       </copy>
+       <tar tarfile="${pkgbase}.tar">
+         <tarfileset dir=".">
+           <include name="${pkgbase}/**"/>
+         </tarfileset>
+       </tar>
+       <gzip zipfile="${pkgbase}.tar.gz" src="${pkgbase}.tar" />
+
+       <delete file="${pkgbase}.tar" />
+       <delete dir="${pkgbase}"/>
+     </target>
+     
+  <target name="javadoc" depends="prepare,parser-gen">
+      <javadoc packagenames="org.pagstract.*"
+               destdir="${javadoc.home}"
+               author  ="true"
+               private ="false"
+               version ="true">
+            <fileset dir="${src}" defaultexcludes="yes">
+                <include name="**/*.java" />
+            </fileset>
+            <fileset dir="${build.src}" defaultexcludes="yes">
+                <include name="**/*.java" />
+            </fileset>
+            <classpath>
+                <pathelement path="${build.classes}"/>
+                <pathelement path="${build.test}"/>
+                <fileset refid="build.libs"/>
+            </classpath>
+            <link href="http://java.sun.com/j2se/1.4.1/docs/api/"/>
+	    <link href="http://java.sun.com/j2ee/sdk_1.3/techdocs/api/"/>
+	    <link href="."/> <!-- our documentation -->
+      </javadoc>
+  </target>
+
+     <target name="clean" description="remove compiled and distribution files">
+        <delete file="${pkgbase}.tar" />
+        <delete file="${pkgbase}.tar.gz" />
+        <delete dir="${pkgbase}"/>
+        <delete dir="${build.classes}"/>
+        <delete dir="${build}"/>
+     </target>
+</project>
