@@ -30,6 +30,7 @@ import org.pagstract.view.template.parser.ast.TileNode;
 import org.pagstract.view.template.parser.ast.ValueNode;
 import org.pagstract.view.template.parser.ast.IfVisibleNode;
 import org.pagstract.view.template.parser.ast.ResourceNode;
+import org.pagstract.view.template.parser.ast.MessageNode;
 import org.pagstract.view.template.parser.ast.Visitor;
 import org.pagstract.view.template.parser.ast.DebugNode;
 import org.pagstract.view.template.parser.scanner.FilePosition;
@@ -202,6 +203,10 @@ public class JavaScriptGenerator implements Visitor {
     }
 
     public void visit(ResourceNode node) throws Exception {
+        writeFunctionParam();
+    }
+
+    public void visit(MessageNode node) throws Exception {
         writeFunctionParam();
     }
 

@@ -29,6 +29,7 @@ public interface Visitor {
     void visit(ValueNode node) throws Exception;
     void visit(BeanNode node) throws Exception;
     void visit(ResourceNode node) throws Exception;
+    void visit(MessageNode node) throws Exception;
 
     //-- inputs
     void visit(InputFieldNode node) throws Exception;

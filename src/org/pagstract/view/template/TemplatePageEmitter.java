@@ -40,6 +40,7 @@ import org.pagstract.view.template.parser.ast.TileNode;
 import org.pagstract.view.template.parser.ast.ValueNode;
 import org.pagstract.view.template.parser.ast.IfVisibleNode;
 import org.pagstract.view.template.parser.ast.ResourceNode;
+import org.pagstract.view.template.parser.ast.MessageNode;
 import org.pagstract.view.template.parser.ast.DebugNode;
 import org.pagstract.view.template.parser.ast.Visitor;
 import org.pagstract.view.template.parser.scanner.FilePosition;
@@ -61,6 +62,7 @@ public class TemplatePageEmitter implements Visitor {
 
     protected Device _out; //not final, since JSTemplatePageEmitter replaces it
     protected final String _parentResource;
+    protected final ResourceResolver _messageBundle;
 
     // FIXME: think about this; should this be handled here ?
     /**
@@ -69,13 +71,13 @@ public class TemplatePageEmitter implements Visitor {
      */
     protected Set _currentFormParameters;
     protected FormNode _currentForm;
-
+    
     public TemplatePageEmitter(String resourceName,
                                Device out, 
                                NameResolver nameResolver,
                                TemplateResolver templateResolver) {
         this(resourceName, out, nameResolver, templateResolver, null, null,
-             new RendererResolver());
+             new RendererResolver(), null);
     }
     
     public TemplatePageEmitter(String resourceName,
@@ -84,7 +86,8 @@ public class TemplatePageEmitter implements Visitor {
                                TemplateResolver templateResolver,
                                ActionUrlProvider urlProvider,
                                ResourceResolver resourceResolver,
-                               RendererResolver rendererResolver)
+                               RendererResolver rendererResolver,
+                               ResourceResolver messageBundle)
     {
         _out = out;
         _nameResolver = nameResolver;
@@ -93,6 +96,7 @@ public class TemplatePageEmitter implements Visitor {
         _parentResource = resourceName;
         _urlProvider = urlProvider;
         _rendererResolver = rendererResolver;
+        _messageBundle = messageBundle;
     }
 
     void setFormParameterCollector(Set s, FormNode formNode) {
@@ -253,8 +257,22 @@ public class TemplatePageEmitter implements Visitor {
     }
 
     public void visit(ResourceNode node) throws Exception {
-        _out.print("\"" + resolveResource(node.getResourceValue(),
-                                          node.getPosition()) + "\"");
+        _out.print(resolveResource(node.getResourceValue(),
+                                   node.getPosition()));
+    }
+
+    public void visit(MessageNode node) throws Exception {
+        if (_messageBundle == null) {
+            writeHiddenMessage("No message bundle given");
+            return;
+        }
+        Object msg = _messageBundle.resolveResource(node.getResourceValue());
+        if (msg != null) {
+            _out.print(msg);
+        }
+        else {
+            writeHiddenMessage("No resource found for " + node.getResourceValue());
+        }
     }
     
     public void visit(BeanNode node) throws Exception {

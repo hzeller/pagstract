@@ -37,6 +37,7 @@ class TemplatePage implements Page {
     private final TemplateNode _rootNode;
     private final Device _out;
     private final RendererResolver _rendererResolver;
+    private final ResourceResolver _messageBundle;
 
     TemplatePage(String resourceName,
                  Namespace rootNamespace, TemplateResolver templateResolver,
@@ -44,7 +45,8 @@ class TemplatePage implements Page {
                  TemplateNode rootNode,
                  Device out, ActionUrlProvider urlProvider,
                  ResourceResolver resourceResolver,
-                 RendererResolver rendererResolver)
+                 RendererResolver rendererResolver,
+                 ResourceResolver messageBundle)
     {
         NameResolver resolver = new NameResolver(rootNamespace);
         //_templatePageEmitter = new TemplatePageEmitter(out, resolver);
@@ -55,7 +57,8 @@ class TemplatePage implements Page {
                                                       templateResolver,
                                                       urlProvider,
                                                       resourceResolver,
-                                                      rendererResolver);
+                                                      rendererResolver,
+                                                      messageBundle);
         /*
          FIXME: this must be optimized; the JS does not change.
         _templatePageEmitter1= new JavaScriptGenerator(code, functionMappings);
@@ -72,6 +75,7 @@ class TemplatePage implements Page {
         _rootNode = rootNode;
         _model = model;
         _rendererResolver = rendererResolver;
+        _messageBundle = messageBundle;
     }
     
     TemplatePage createCopy(TemplateResolver resolver, Device out,
@@ -79,7 +83,8 @@ class TemplatePage implements Page {
                             ResourceResolver resourceResolver) {
         return new TemplatePage(_pageName, _rootNamespace,
                                 resolver, _model, _rootNode, out, urlProvider,
-                                resourceResolver, _rendererResolver);
+                                resourceResolver, _rendererResolver,
+                                _messageBundle);
     }
 
     /**

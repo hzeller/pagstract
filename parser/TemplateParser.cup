@@ -70,6 +70,7 @@ terminal TemplateToken
          TileStart, TileEnd, TileSimple;
 
 terminal SimpleTemplateToken ResourceResolver;
+terminal SimpleTemplateToken MessageResolver;
 
 //terminal TemplateToken    TextareaStart, TextareaEnd, TextareaSimple
 
@@ -89,6 +90,7 @@ non terminal NodeSequence      Sequence;
 non terminal ConstantNode      ConstantTag;
 non terminal SwitchNode        SwitchTag;
 non terminal ResourceNode      ResourceTag;
+non terminal MessageNode       MessageTag;
 non terminal Map               CaseList;
 non terminal TemplateNode      IgnoredSequence;
 non terminal ListContentContainer ListContentSequence;
@@ -117,6 +119,7 @@ SomeTag ::=
         | SwitchTag:t    {: RESULT= t; :}
         | ConstantTag:t  {: RESULT= t; :}
         | ResourceTag:t  {: RESULT= t; :}
+        | MessageTag:t   {: RESULT= t; :}
         | ValueTag:t     {: RESULT= t; :}
         | DebugTag:t     {: RESULT= t; :}
         | TileTag:t      {: RESULT= t; :}
@@ -209,6 +212,10 @@ DebugTag ::=
           DebugStart:v IgnoredSequence DebugEnd:e 
                        {: RESULT= new DebugNode( v ); :}
         | DebugSimple:v {: RESULT= new DebugNode( v ); :}
+        ;
+
+MessageTag ::= 
+        MessageResolver:r {: RESULT = new MessageNode(r); :}
         ;
 
 ResourceTag ::= 

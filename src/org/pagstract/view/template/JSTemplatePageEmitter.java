@@ -32,6 +32,7 @@ import org.pagstract.view.template.parser.ast.SelectFieldNode;
 import org.pagstract.view.template.parser.ast.SwitchNode;
 import org.pagstract.view.template.parser.ast.TemplateNode;
 import org.pagstract.view.template.parser.ast.ResourceNode;
+import org.pagstract.view.template.parser.ast.MessageNode;
 import org.pagstract.view.template.parser.ast.ValueNode;
 
 /**
@@ -56,11 +57,12 @@ public class JSTemplatePageEmitter extends TemplatePageEmitter {
                                  Map nodeFunctions, 
                                  ActionUrlProvider urlProvider,
                                  ResourceResolver resourceResolver,
-                                 RendererResolver rendererResolver)
+                                 RendererResolver rendererResolver,
+                                 ResourceResolver messageBundle)
     {
         // consider aggregation..
         super(resourceName, out, nameResolver, templateResolver,
-              urlProvider, resourceResolver, rendererResolver);
+              urlProvider, resourceResolver, rendererResolver, messageBundle);
         _origDevice = out;
         _functionCode = functionCode;
         _nodeFunctions = nodeFunctions;
@@ -204,6 +206,15 @@ public class JSTemplatePageEmitter extends TemplatePageEmitter {
     }
 
     public void visit(ResourceNode node) throws Exception {
+        if (_inFunctionParameter >= 0 && _out == null) {
+            _out = new StringBufferDevice();
+        }
+        ++_nestDepth;
+        super.visit(node);
+        --_nestDepth;
+    }
+
+    public void visit(MessageNode node) throws Exception {
         if (_inFunctionParameter >= 0 && _out == null) {
             _out = new StringBufferDevice();
         }

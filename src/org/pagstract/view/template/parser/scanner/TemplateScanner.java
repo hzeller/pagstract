@@ -118,7 +118,8 @@ public class TemplateScanner implements Scanner {
         new BasicToken("}",          -1, true),
 
         // that single token must be the last one..
-        (new BasicToken("\"resource://",sym.ResourceResolver)).setResourceExp()
+        (new BasicToken("resource://",sym.ResourceResolver)).setResourceExp(),
+        (new BasicToken("msg://",sym.MessageResolver)).setResourceExp()
     };
 
     private final static TokenMatchPattern MATCH_PATTERN;
@@ -347,18 +348,24 @@ public class TemplateScanner implements Scanner {
             if (token.isResourceExpansion()) {
                 int c;
                 do {
+                    _in.mark(1);
                     c = _in.read();
                 }
-                while (c >= 0 && c != '"');
+                while (c >= 0 && c != '"' 
+                       && !Character.isWhitespace(c)
+                       && c != '<' && c != '&');
+
                 byte[] range = _recordingStream
                     .getBuffer(recordedTagBeginPos+1,
                                _recordingStream.getCurrentPosition()-1);
+                _in.reset();
+
                 final String resolveResourceName = new String(range);
                 FilePosition pos = new FilePosition(_resourceName,tagStartPos);
                 SimpleTemplateToken tok = 
                     new SimpleTemplateToken(pos, resolveResourceName);
-                _nextSymbol = new Symbol(sym.ResourceResolver, tok);
-                traceSymbol("resource://", pos);
+                _nextSymbol = new Symbol(token.getSymbol(), tok);
+                traceSymbol(token.getKeyword(), pos);
             }
             else if (token.isStartToken() && token.isDollarExpansion()) {
                 tokenNum = _tokenMatcher.nextToken();

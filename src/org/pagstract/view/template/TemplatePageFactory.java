@@ -36,6 +36,7 @@ public class TemplatePageFactory implements PageFactory {
     protected final ActionUrlProvider _urlProvider; 
     protected final ResourceResolver _resourceResolver;
     protected final RendererResolver _rendererResolver;
+    protected final ResourceResolver _messageBundle;
 
     /**
      * @deprecated call with explicit resolver instead.
@@ -50,6 +51,7 @@ public class TemplatePageFactory implements PageFactory {
         _urlProvider = null;
         _resourceResolver = null;
         _rendererResolver = new RendererResolver();
+        _messageBundle = null;
     }
 
     public TemplatePageFactory(Device out, String basePath,
@@ -78,7 +80,7 @@ public class TemplatePageFactory implements PageFactory {
                                ResourceResolver resourceResolver) {
         this(out, new PrefixResourceResolver(basePath),
              resolver, urlProvider, resourceResolver,
-             new RendererResolver());
+             new RendererResolver(), null);
     }
 
     /**
@@ -103,7 +105,8 @@ public class TemplatePageFactory implements PageFactory {
                                TemplateResolver resolver,
                                ActionUrlProvider urlProvider,
                                ResourceResolver resourceResolver,
-                               RendererResolver rendererResolver)
+                               RendererResolver rendererResolver,
+                               ResourceResolver messageBundle)
         
     {
         _out = out;
@@ -112,6 +115,7 @@ public class TemplatePageFactory implements PageFactory {
         _urlProvider = urlProvider;
         _resourceResolver = resourceResolver;
         _rendererResolver = rendererResolver;
+        _messageBundle = messageBundle;
     }
     
     /**
@@ -140,7 +144,8 @@ public class TemplatePageFactory implements PageFactory {
         TemplateNode rootNode = _resolver.resolveTemplate(filename);
         return new TemplatePage(filename, rootNamespace, _resolver, model, 
                                 rootNode, _out, _urlProvider, 
-                                _resourceResolver, _rendererResolver);
+                                _resourceResolver, _rendererResolver,
+                                _messageBundle);
     }
     
     /**

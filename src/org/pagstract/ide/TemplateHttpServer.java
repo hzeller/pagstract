@@ -140,7 +140,8 @@ public class TemplateHttpServer {
                                     + "/" + _templatePath + "/",
                                     out, resolver, _templateResolver,
                                     null, _resourceResolver,
-                                    new RendererResolver());
+                                    new RendererResolver(), 
+                                    null);
         long start = System.currentTimeMillis();
         _currentTemplate.getTemplateRootNode().accept(emitter);
         System.err.println("RenderTime: " 
