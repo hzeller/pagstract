@@ -29,6 +29,7 @@ import org.pagstract.view.namespace.NameResolver;
 import org.pagstract.view.namespace.Namespace;
 import org.pagstract.view.template.TemplatePageEmitter;
 import org.pagstract.view.template.TemplateResolver;
+import org.pagstract.view.template.ResourceResolver;
 
 /**
  * A super-simple HTTP-Server that answers any request
@@ -50,6 +51,7 @@ public class TemplateHttpServer {
     private final int _listenPort;
     private final File _docRoot;
     private final File _templateDir;
+    private final ResourceResolver _resourceResolver;
 
     private TemplateSource _currentTemplate;
     private TemplateResolver _templateResolver;
@@ -57,12 +59,14 @@ public class TemplateHttpServer {
     public TemplateHttpServer(File templateDir, 
                               File documentRoot, 
                               TemplateResolver templateResolver,
+                              ResourceResolver resourceResolver,
                               int listenPort) 
     {
         _docRoot = documentRoot;
         _templateDir = templateDir;
         _listenPort = listenPort;
         _templateResolver = templateResolver;
+        _resourceResolver = resourceResolver;
     }
 
     public void serve() throws IOException {
@@ -130,9 +134,11 @@ public class TemplateHttpServer {
 
         Namespace rootNs = _currentTemplate.getRootNamespace();
         NameResolver resolver = new NameResolver(rootNs);
+        
         TemplatePageEmitter emitter = 
-            new TemplatePageEmitter(_templateDir.getCanonicalPath(),
-                                    out, resolver, _templateResolver);
+            new TemplatePageEmitter(_templateDir.getCanonicalPath() + "/",
+                                    out, resolver, _templateResolver,
+                                    null, _resourceResolver);
         long start = System.currentTimeMillis();
         _currentTemplate.getTemplateRootNode().accept(emitter);
         System.err.println("RenderTime: " 
@@ -141,13 +147,14 @@ public class TemplateHttpServer {
     }
     
     private void serveFile(String file, Device out) throws IOException {
+        System.out.print(file);
         File serveFile = new File(_docRoot, file);
         if (!serveFile.exists()) {
             out.print("HTTP/1.0 404 Not Found\r\n");
             out.print("Content-Type: text/html\r\n");
             out.print("\r\n");
             out.print("<em>" + file + "</em>: not found.\n");
-            System.err.println(file + ": not found.");
+            System.out.println(" (NOT FOUND)");
             return;
         }
         
@@ -179,6 +186,8 @@ public class TemplateHttpServer {
         while ((inBytes = in.read(buffer)) >= 0) {
             out.write(buffer, 0, inBytes);
         }
+
+        System.out.println(" (delivered)");
     }
 
     public void setCurrentTemplate(TemplateSource ts) {

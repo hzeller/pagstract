@@ -41,6 +41,7 @@ public class TemplatePanel extends JPanel implements TemplateSource {
     {
         _cache = cache;
         _templateFileName = file;
+        System.err.println(_templateFileName);
 
         ContentEditPanel editPane = new ContentEditPanel();
         Namespace abstractNs = new PageModelClassNamespace(pageModelClass);
@@ -55,7 +56,7 @@ public class TemplatePanel extends JPanel implements TemplateSource {
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.add(new JScrollPane(tree));
         
-        // edit stuff not centered.
+        //-- edit stuff not centered.
         JPanel editTop = new JPanel();
         editTop.setLayout(new BorderLayout());
         editTop.add(editPane, BorderLayout.NORTH);

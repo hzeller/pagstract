@@ -17,6 +17,7 @@ import java.io.File;
 import java.util.Iterator;
 
 import javax.swing.JFrame;
+import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -39,13 +40,16 @@ public class PageModelIdeFrame extends JFrame {
         setSize(new Dimension(width, height));
 
         _templateSelector = new JTabbedPane();
+        
         Iterator it = models.getModelNames();
         while (it.hasNext()) {
             String name = (String) it.next();
+            System.err.println(name);
             Class cls = models.getPageModel(name);
             String templateFile = getTemplateNameFor(cls, baseDir);
-            _templateSelector.add(name, new TemplatePanel(name, cls, cache,
-                                                          templateFile));
+            JComponent comp = new TemplatePanel(name, cls, cache,
+                                                templateFile);
+            _templateSelector.add(name, comp);
         }
         server.setCurrentTemplate((TemplateSource)_templateSelector.getSelectedComponent());
 

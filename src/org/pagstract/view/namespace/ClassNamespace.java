@@ -116,7 +116,11 @@ public class ClassNamespace implements Namespace {
             || short.class == namedClass
             || char.class  == namedClass
             || byte.class  == namedClass
-            || boolean.class == namedClass) {
+            || boolean.class == namedClass
+            || Integer.class == namedClass
+            || Boolean.class == namedClass
+            || Long.class == namedClass
+            || String.class == namedClass) {
             return false;
         }
         return true; // anything else will be handled as a namespace

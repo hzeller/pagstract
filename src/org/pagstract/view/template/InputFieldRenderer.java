@@ -159,6 +159,7 @@ public class InputFieldRenderer implements ComponentRenderer {
         }
 
         final Set alreadyWritten = new HashSet();
+        if (checkableInput) alreadyWritten.add("checked");
         alreadyWritten.add("pma:name");
         alreadyWritten.add("name");
         alreadyWritten.add("type");
@@ -185,7 +186,7 @@ public class InputFieldRenderer implements ComponentRenderer {
         Iterator it = attributes.getAttributeNames();
         while (it.hasNext()) {
             String attributeName= (String)it.next();
-            if (alreadyWritten.contains(attributeName)) {
+            if (alreadyWritten.contains(attributeName.toLowerCase())) {
                 continue;
             }
             out.print( attributeName );

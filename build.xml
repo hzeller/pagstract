@@ -82,8 +82,8 @@
 	      <attribute name="Created-By" value="Henner Zeller"/>
 	      <attribute name="Main-Class" 
 	                 value="org.pagstract.ide.PageModelIde"/>
-	      <attribute name="Class-Path"
-	                 value="javacup-runtime-0.10j.jar"/>
+	      <!--attribute name="Class-Path"
+	                 value="javacup-runtime-0.10j.jar"/-->
 	   </manifest>
         </jar>
      </target>
@@ -96,6 +96,7 @@
               <include name="**/*.png"/>
            </fileset>
            <zipfileset src="${extern.libdir}/javacup-runtime-0.10j.jar"/>
+           <zipfileset src="${extern.libdir}/commons-logging-api-1.0.1.jar"/>
 	   <manifest>
 	      <attribute name="Created-By" value="Henner Zeller"/>
 	      <attribute name="Main-Class" 

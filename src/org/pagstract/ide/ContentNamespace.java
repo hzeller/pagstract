@@ -61,6 +61,7 @@ public class ContentNamespace implements Namespace, ComponentIcons {
         }
         Namespace result = null;
         if (!_content.containsKey(name)) {
+            //System.err.println("create subnamespace: " + name);
             Namespace abstractSub = _abstractNamespace.getSubNamespace(name);
             ContentEditPanel namedParent = new ContentEditPanel();
             Border blackline = BorderFactory.createLineBorder(Color.black);
@@ -91,7 +92,20 @@ public class ContentNamespace implements Namespace, ComponentIcons {
             _content.put(name, result);
         }
         else {
-            result = (Accessor) _content.get(name);
+            Object nsContent = _content.get(name);
+            if (nsContent instanceof Accessor) {
+                result = (Accessor) nsContent;
+            }
+            else {
+                /*
+                System.err.println("ACHTUNG: while accessing '" 
+                                   + name + "': "
+                                   + _content.getClass()
+                                   + "->" + _content);
+                */
+                // ungetypt zurück..
+                return nsContent;
+            }
         }
         return result.getContent();
     }
@@ -216,12 +230,12 @@ public class ContentNamespace implements Namespace, ComponentIcons {
 
     private Accessor createObjectFor(String name, boolean iterate) {
         Class cls = getNamedObjectType(name);
-        if (ActionModel.class.isAssignableFrom(cls)) {
+        if (cls!=null && ActionModel.class.isAssignableFrom(cls)) {
             return new ObjectAccessor(new ActionModelAdapter("http://foo/",
                                                              "GET"),
                                       iterate);
         }
-        else if (TextFieldModel.class.isAssignableFrom(cls)) {
+        else if (cls!=null && TextFieldModel.class.isAssignableFrom(cls)) {
             TextFieldModelAccessor tfma = new TextFieldModelAccessor();
             JLabel label = new JLabel(name);
             label.setIcon( INPUT_ICON );
@@ -234,7 +248,7 @@ public class ContentNamespace implements Namespace, ComponentIcons {
                                               tfma.getComponent());
             return tfma;
         }
-        else if (DataModel.class.isAssignableFrom(cls)) {
+        else if (cls!=null && DataModel.class.isAssignableFrom(cls)) {
             SD s = new SD();
             for (int i=0; i < 5; ++i) {
                 s.addPair("foo-"+i, "bar-"+i);
