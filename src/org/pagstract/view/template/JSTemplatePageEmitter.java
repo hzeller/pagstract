@@ -126,14 +126,22 @@ public class JSTemplatePageEmitter extends TemplatePageEmitter {
             return;
         }
 
+        Integer startPos = node.getStartPos();
+        int start = (startPos != null) ? startPos.intValue() : 0;
+        // vorausnudeln .. unhübsch..
+        for (int consume = 0; consume < start && nsIt.hasNext(); ++consume) {
+            nsIt.next();
+        }
         boolean hasAnyContent = nsIt.hasNext();
 
         if (hasAnyContent && node.getHeader() != null) {
             node.getHeader().accept(this);
         }
         
-        int i = 0;
-        for (int index=0; nsIt.hasNext(); ++index) {
+        int max = ((node.getCount() != null) 
+                   ? node.getCount().intValue() + start
+                   : -1);
+        for (int index=start; nsIt.hasNext() && (max < 0 || index < max); ++index) {
             Namespace ns = (Namespace) nsIt.next();
             
             try {
