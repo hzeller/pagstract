@@ -12,17 +12,24 @@
  */
 package org.pagstract.model;
 
+import java.util.Map;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.HashMap;
+
 /**
  * Model for any kind of text fields. The actual rendering as
  * Textfield or TextArea is left to the renderer.
  *
  * @author Henner Zeller
  */
-public class TextFieldModel implements ComponentModel, SingleValueModel 
+public class TextFieldModel 
+    implements ComponentModel, SingleValueModel, AttributeSet
 {
     private String  _value;
     private boolean _enabled;
     private boolean _visible;
+    private Map/*<String,String>*/ _attributes;
 
     public TextFieldModel() {
         this(null);
@@ -51,7 +58,12 @@ public class TextFieldModel implements ComponentModel, SingleValueModel
     public void setVisible(boolean v) { 
         _visible = v; 
     }
-
+    public void addAttribute(String name, String value) {
+        if (_attributes == null) {
+            _attributes = new HashMap();
+        }
+        _attributes.put(name, value);
+    }
 
     //-- interface ComponentModel 
     public boolean isEnabled() { 
@@ -65,6 +77,18 @@ public class TextFieldModel implements ComponentModel, SingleValueModel
     //-- interface SingleValueModel
     public String getValue() { return getText(); }
     public void   setValue(String s) { setText(s); }
+
+    //-- interface AttributeSet
+    public Iterator/*<String>*/ getAttributeNames() {
+        if (_attributes == null) return Collections.EMPTY_LIST.iterator();
+        return _attributes.keySet().iterator();
+    }
+
+    public String getAttribute(String name) {
+        if (_attributes == null) return null;
+        return (String) _attributes.get(name);
+    }
+
 }
 
 /* Emacs: 
