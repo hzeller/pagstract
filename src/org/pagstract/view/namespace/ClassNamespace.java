@@ -98,6 +98,28 @@ public class ClassNamespace implements Namespace {
         throw new UnsupportedOperationException("no concrete object accessible in ClassNamespace to access namespace iterator");
     }
 
+    static boolean isTypeANamespace(Class cls) {
+        if (cls == null) {
+            return false;
+        }
+        if (cls == String.class
+            || DataModel.class.isAssignableFrom(cls)
+            || ComponentModel.class.isAssignableFrom(cls)
+            || long.class.isAssignableFrom(cls)
+            || int.class   == cls
+            || short.class == cls
+            || char.class  == cls
+            || byte.class  == cls
+            || boolean.class == cls
+            || Integer.class == cls
+            || Boolean.class == cls
+            || Long.class == cls
+            || String.class == cls) {
+            return false;
+        }
+        return true; // anything else will be handled as a namespace
+    }
+
     /**
      * checks if a named object within this namespace is a
      * namespace. If so, they can be accessed with 
@@ -105,25 +127,7 @@ public class ClassNamespace implements Namespace {
      */
     public boolean isNamespace(String name) {
         Class namedClass = getNamedObjectType(name);
-        if (namedClass == null) {
-            return false;
-        }
-        if (namedClass == String.class
-            || DataModel.class.isAssignableFrom(namedClass)
-            || ComponentModel.class.isAssignableFrom(namedClass)
-            || long.class.isAssignableFrom(namedClass)
-            || int.class   == namedClass
-            || short.class == namedClass
-            || char.class  == namedClass
-            || byte.class  == namedClass
-            || boolean.class == namedClass
-            || Integer.class == namedClass
-            || Boolean.class == namedClass
-            || Long.class == namedClass
-            || String.class == namedClass) {
-            return false;
-        }
-        return true; // anything else will be handled as a namespace
+        return isTypeANamespace(namedClass);
     }
 
     /**

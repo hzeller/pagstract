@@ -36,17 +36,13 @@ public class PageModelIde {
         File modelJarFile = new File(argv[0]);
         ModelContainer models = new JarModelContainer(modelJarFile);
                                                                      
-        File templateDir = new File(argv[1]);
-        File docRoot = (argv.length == 3) ? new File(argv[2]) : templateDir;
+        File baseDir = new File(argv[1]);
+        String templateBase = (argv.length == 3) ? argv[2] : "e";
+        templateBase += "/";
 
-        if (!templateDir.isDirectory()) {
+        if (!baseDir.isDirectory()) {
             usage();
-            System.err.println(templateDir + ": not a directory");
-        }
-
-        if (!docRoot.isDirectory()) {
-            usage();
-            System.err.println(docRoot + ": not a directory");
+            System.err.println(baseDir + ": not a directory");
         }
 
         /* web-resources werden einfach in dem Pfad abgebildet */
@@ -62,13 +58,15 @@ public class PageModelIde {
         TemplateResolver cache = new FileTemplateResolver(templateRes);
         
         System.err.println("init HTTP-server..");
-        TemplateHttpServer server = new TemplateHttpServer(templateDir,
-                                                           docRoot, cache,
+        TemplateHttpServer server = new TemplateHttpServer(baseDir, 
+                                                           templateBase,
+                                                           cache,
                                                            webResolver,
                                                            1234);
 
         System.err.println("init frame..");
-        JFrame frame = new PageModelIdeFrame(900, 700, models, templateDir,
+        JFrame frame = new PageModelIdeFrame(900, 700, models, 
+                                             new File(baseDir, templateBase),
                                              cache, server);
         frame.addWindowListener(new WindowAdapter() {
                 public void windowClosing(WindowEvent e) {System.exit(0);}
@@ -81,7 +79,7 @@ public class PageModelIde {
     }
 
     private static void usage() {
-        System.err.println("usage: PageModelIde <model.jar> <template-directory>");// [<document-root>]");
+        System.err.println("usage: PageModelIde <model.jar> <base-directory> <relative-template-base>");
     }
 }
 

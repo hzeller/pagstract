@@ -54,7 +54,7 @@ public class JarModelContainer implements ModelContainer {
         String line;
         while ((line = lineReader.readLine()) != null) {
             line = line.trim();
-            if (line.startsWith("#")) { /* comment */
+            if (line.length() == 0 || line.startsWith("#")) { /* comment */
                 continue;
             }
             StringTokenizer lineTok = new StringTokenizer(line, ":");

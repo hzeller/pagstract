@@ -62,7 +62,7 @@ terminal TemplateToken LinkStart, LinkEnd,
                   ListContentStart, ListContentEnd,
                   ListSeparatorStart, ListSeparatorEnd,
                   ListFooterStart, ListFooterEnd,
-
+                  ListGroupStart, ListGroupEnd,
                   TileStart, TileEnd, TileSimple;
 
 terminal SimpleTemplateToken ResourceResolver;
@@ -158,7 +158,7 @@ ListContent ::=
         | ListFooterStart Sequence:s ListFooterEnd
                {: RESULT=new ListFooterContent(s); :}
         ;
-
+         
 BeanTag ::= 
           BeanStart:tag Sequence:content BeanEnd {: RESULT= new BeanNode( tag, content); :}
         ;

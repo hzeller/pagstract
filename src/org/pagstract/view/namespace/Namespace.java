@@ -31,6 +31,10 @@ public interface Namespace {
      */
     boolean containsName(String name);
 
+    /**
+     * returns the named subnamespace. This method throws a 
+     * NoSuchElementException if the isNamespace() predicate returns false.
+     */
     Namespace getSubNamespace(String name) throws NoSuchElementException;
     
     /**
@@ -41,6 +45,9 @@ public interface Namespace {
     Object getNamedObject(String name) 
         throws UnsupportedOperationException;
 
+    /**
+     * returns an Iterator of namespaces, if this is an iterable Object.
+     */
     Iterator/*<Namespace>*/ getNamespaceIterator(String name)
         throws UnsupportedOperationException;
 

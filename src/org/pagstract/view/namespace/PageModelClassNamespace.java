@@ -93,23 +93,8 @@ public class PageModelClassNamespace implements Namespace {
      * {@link #getSubNamespace(String)}.
      */
     public boolean isNamespace(String name) {
-        Class cls = (Class) _pageModelNames.get(name);
-        if (cls == null) {
-            return false;
-        }
-
-       if (cls == String.class
-            || DataModel.class.isAssignableFrom(cls)
-            || ComponentModel.class.isAssignableFrom(cls)
-            || long.class.isAssignableFrom(cls)
-            || int.class   == cls
-            || short.class == cls
-            || char.class  == cls
-            || byte.class  == cls
-            || boolean.class == cls) {
-            return false;
-        }
-        return true; // anything else will be handled as a class-namespace
+        Class namedType = (Class) _pageModelNames.get(name);
+        return ClassNamespace.isTypeANamespace(namedType);
     }
 
     /**

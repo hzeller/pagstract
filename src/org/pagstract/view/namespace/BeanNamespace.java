@@ -53,6 +53,15 @@ public class BeanNamespace extends ClassNamespace {
             _log.debug("dummy zurück ..");
             return new BeanNamespace(getter.getReturnType(), null);
         }
+        
+        /*
+         * If the user returns an own implementation of an Namespace,
+         * he can implement his own resolving.
+         */
+        if (object instanceof Namespace) {
+            return (Namespace) object;
+        }
+        
         return new BeanNamespace(object);
     }
 

@@ -47,6 +47,10 @@ public final class NameResolver {
     public NameResolver(Namespace rootNamespace) {
         _rootNamespace = rootNamespace;
         _namespaceStack = new Stack();
+        /*
+         * the root-namespace is at the top..
+         */
+        _namespaceStack.push(_rootNamespace);
         _iteratorIndexStack = new Stack();
     }
 

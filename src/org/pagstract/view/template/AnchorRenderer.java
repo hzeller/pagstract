@@ -125,6 +125,12 @@ public class AnchorRenderer implements ComponentRenderer {
             actionUrl = value.toString();
         }
 
+        /*
+         * das mit den styles und classes ist ein
+         * Versuch. Wenn das gut ist, dann kommt es mit ins
+         * modell
+         */
+        boolean wroteSpan = false;
         if (enabled) {
             out.write( s_a_href );
             out.print( actionUrl );
@@ -132,19 +138,71 @@ public class AnchorRenderer implements ComponentRenderer {
 
             Iterator origAttrIt = origTag.getAttributeNames();
             while( origAttrIt.hasNext()) {
-                String attributeName= (String) origAttrIt.next();
+                final String attributeName= (String) origAttrIt.next();
                 if ("pma:name".equals(attributeName) 
-                    || "name".equalsIgnoreCase(attributeName)
                     || "href".equalsIgnoreCase(attributeName)) {
                     continue;
                 }
+                
+                String tagAttribute = attributeName;
+                /* ein Versuch: wenn das gut ist, muss das mit ins
+                 * model. */
+                if (tagAttribute.startsWith("pma:")) {
+                    if (attributeName.equals("pma:enabled-class")) {
+                        tagAttribute = "class";
+                    }
+                    else if (attributeName.equals("pma:enabled-style")) {
+                        tagAttribute = "style";
+                    }
+                    // kein rewrite stattgefunden: weiter ..
+                    if (tagAttribute.startsWith("pma:")) {
+                        continue;
+                    }
+                }
                 out.print( " " );
-                out.print( attributeName );
+                out.print( tagAttribute );
                 out.print( "=\"" );
                 out.print( origTag.getAttribute(attributeName) );
                 out.print( "\"" );
             }
             out.write( s_closebracket);
+        }
+        else {
+            Iterator origAttrIt = origTag.getAttributeNames();
+            while( origAttrIt.hasNext()) {
+                final String attributeName= (String) origAttrIt.next();
+                if ("pma:name".equals(attributeName) 
+                    || "href".equalsIgnoreCase(attributeName)) {
+                    continue;
+                }
+                
+                String tagAttribute = attributeName;
+                if (tagAttribute.startsWith("pma:")) {
+                    if (tagAttribute.equals("pma:disabled-class")) {
+                        tagAttribute = "class";
+                    }
+                    else if (tagAttribute.equals("pma:disabled-style")) {
+                        tagAttribute = "style";
+                    }
+                    // kein rewrite stattgefunden: weiter ..
+                    if (tagAttribute.startsWith("pma:")) {
+                        continue;
+                    }
+                }
+                
+                if (!wroteSpan) {
+                    out.print("<span");
+                    wroteSpan = true;
+                }
+                out.print(" ");
+                out.print( tagAttribute );
+                out.print( "=\"" );
+                out.print( origTag.getAttribute(attributeName) );
+                out.print( "\"" );
+            }
+            if (wroteSpan) {
+                out.print(">");
+            }
         }
         
         try {
@@ -159,9 +217,12 @@ public class AnchorRenderer implements ComponentRenderer {
         catch (Exception e) {
             throw new RenderException(e);
         }
-
+        
         if (enabled) {
             out.write(s_end_a_tag);
+        }
+        else if (wroteSpan) {
+            out.print("</span>");
         }
     }
 }

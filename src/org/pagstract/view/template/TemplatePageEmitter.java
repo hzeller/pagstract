@@ -216,6 +216,9 @@ public class TemplatePageEmitter implements Visitor {
             try {
                 _nameResolver.pushNamespace(ns);
                 _nameResolver.pushIteratorIndex(index);
+                /*
+                 * entweder direkt content oder eine contentgroup.
+                 */
                 content.accept(this);
             }
             finally {
@@ -239,12 +242,10 @@ public class TemplatePageEmitter implements Visitor {
     }
 
     public void visit(ResourceNode node) throws Exception {
-        _out.print("\"" 
-                   + resolveResource(node.getResourceValue(),
-                                     node.getPosition()) 
-                   + "\"");
+        _out.print("\"" + resolveResource(node.getResourceValue(),
+                                          node.getPosition()) + "\"");
     }
-
+    
     public void visit(BeanNode node) throws Exception {
         NamingContext ctxt = resolveNameCtxt(node);
         if (ctxt == null) {

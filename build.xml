@@ -2,7 +2,7 @@
 <project name="Pagstract - web application view model"
          default="compile" basedir=".">
      <!-- properties -->
-     <property name="version"              value="0.36" />
+     <property name="version"              value="0.37" />
      <property name="src"                  value="src" />
      <property name="bin"                  value="bin" />
      <property name="lib"                  value="lib" />
@@ -58,7 +58,7 @@
      <target name="compile" depends="prepare, parser-gen"
              description="compile pagstract">
         <javac srcdir="${build.src}:${src}" destdir="${build.classes}"
- 	       debug="true">
+ 	       debug="true" source="1.3" target="1.3">
 	   <classpath refid="build.classpath" />
 	</javac>
         <copy todir="${build.classes}">

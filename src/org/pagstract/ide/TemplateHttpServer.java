@@ -50,23 +50,22 @@ public class TemplateHttpServer {
     }
     private final int _listenPort;
     private final File _docRoot;
-    private final File _templateDir;
     private final ResourceResolver _resourceResolver;
+    private final String _templatePath;
 
     private TemplateSource _currentTemplate;
     private TemplateResolver _templateResolver;
 
-    public TemplateHttpServer(File templateDir, 
-                              File documentRoot, 
+    public TemplateHttpServer(File docRoot, String templatePath,
                               TemplateResolver templateResolver,
                               ResourceResolver resourceResolver,
                               int listenPort) 
     {
-        _docRoot = documentRoot;
-        _templateDir = templateDir;
+        _docRoot = docRoot;
         _listenPort = listenPort;
         _templateResolver = templateResolver;
         _resourceResolver = resourceResolver;
+        _templatePath = templatePath;
     }
 
     public void serve() throws IOException {
@@ -136,7 +135,8 @@ public class TemplateHttpServer {
         NameResolver resolver = new NameResolver(rootNs);
         
         TemplatePageEmitter emitter = 
-            new TemplatePageEmitter(_templateDir.getCanonicalPath() + "/",
+            new TemplatePageEmitter(_docRoot.getCanonicalPath() 
+                                    + "/" + _templatePath + "/",
                                     out, resolver, _templateResolver,
                                     null, _resourceResolver);
         long start = System.currentTimeMillis();
