@@ -14,11 +14,12 @@ package org.pagstract.view.template.parser.scanner;
 
 import java.util.Iterator;
 import java.util.Map;
+import org.pagstract.model.AttributeSet;
 
 /**
  * Ein TemplateToken hat eine Position im File.
  */
-public class TemplateToken {
+public class TemplateToken implements AttributeSet {
     private final FilePosition _position;
     private final Map _attributeMap;
 

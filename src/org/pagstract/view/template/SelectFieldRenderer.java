@@ -15,9 +15,12 @@ package org.pagstract.view.template;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.pagstract.io.Device;
 import org.pagstract.model.ComponentModel;
+import org.pagstract.model.AttributeSet;
 import org.pagstract.model.MultipleValueModel;
 import org.pagstract.model.SelectionDescriptor;
 import org.pagstract.model.SelectionListModel;
@@ -56,6 +59,8 @@ public class SelectFieldRenderer implements ComponentRenderer {
                        Object value, Device out) 
         throws IOException 
     {
+        AttributeSet attributeSet = null;
+
         if (value == null) {
             return;
         }
@@ -70,6 +75,10 @@ public class SelectFieldRenderer implements ComponentRenderer {
             isEnabled = model.isEnabled();
         }
 
+        if (value instanceof AttributeSet) {
+            attributeSet = (AttributeSet) value;
+        }
+
         SelectFieldNode node = (SelectFieldNode) n;
         if (!(value instanceof SelectionListModel)) {
             throw new IllegalArgumentException("SelectionField " 
@@ -79,14 +88,25 @@ public class SelectFieldRenderer implements ComponentRenderer {
         SelectionListModel selectionModel = (SelectionListModel) value;
 
         /*
-         * if this is not enabled, then only write the value. Set the same
-         * properties (like 'class') in a sourrouding <span></span>
+         * Der Name ist der pma:name, wenn es keinen entsprechenden 
+         * Namen im HTML gibt. In beiden Fällen wird hinterher der Suffix
+         * aus der aktuellen Iteration 'drangehängt.
+         * Ein Attribute 'name' überschreibt alles.
+         * --- vereinheitlichen in InputField und Select
          */
         TemplateToken origTag = node.getTemplateToken();
-        String	tagName= origTag.getName();
-        String inputName = ((tagName == null) 
-                            ? node.getModelName()
-                            : tagName);
+        String	inputName = origTag.getName();
+        inputName = (inputName == null) ? node.getModelName() : inputName;
+        if (_suffix != null) {
+            inputName += _suffix;
+        }
+        
+        if (attributeSet != null) {
+            String overrideName = attributeSet.getAttribute("name");
+            if (overrideName != null) {
+                inputName = overrideName;
+            }
+        }
 
         if (renderVisitor instanceof TemplatePageEmitter) {
             ((TemplatePageEmitter)renderVisitor).addUsedInputFieldName(inputName);
@@ -96,29 +116,18 @@ public class SelectFieldRenderer implements ComponentRenderer {
             out.write( s_select );
             
             out.write( s_name_eq );
-            // FIXME: make this work identical in JSP and Template..
             out.print( inputName );
-            if (_suffix != null) {
-                out.print(_suffix);
-            }
             out.write( s_quote_space );
         }
         else {
             out.write( s_span_open );
         }
 
-        Iterator it= origTag.getAttributeNames();
-        while( it.hasNext()) {
-            String attributeName= (String)it.next();
-            if ("pma:name".equals(attributeName) 
-                || "name".equalsIgnoreCase(attributeName)) {
-                continue;
-            }
-            out.print( attributeName );
-            out.write( s_equals_quot );
-            out.print( origTag.getAttribute(attributeName) );
-            out.write( s_quote_space );
-        }
+        final Set alreadyWritten = new HashSet();
+        alreadyWritten.add("pma:name");
+        alreadyWritten.add("name");
+        appendAttributes(out, alreadyWritten, attributeSet);
+        appendAttributes(out, alreadyWritten, origTag);
 
         String singleSelected = null;
         if (value instanceof SingleValueModel) {
@@ -133,7 +142,7 @@ public class SelectFieldRenderer implements ComponentRenderer {
         
         out.write( s_bracketclose );
         
-        it = selectionModel.getSelectionDescriptors();
+        Iterator it = selectionModel.getSelectionDescriptors();
         String currentValue = null;
         while (it.hasNext()) {
             SelectionDescriptor desc = (SelectionDescriptor) it.next();
@@ -185,6 +194,25 @@ public class SelectFieldRenderer implements ComponentRenderer {
             out.print("'" + " value='");
             Utils.quote(out, currentValue);
             out.print("'/>");
+        }
+    }
+
+    private void appendAttributes(Device out, Set alreadyWritten, 
+                                  AttributeSet attributes) 
+        throws IOException
+    {
+        if (attributes == null) return;
+        Iterator it = attributes.getAttributeNames();
+        while (it.hasNext()) {
+            String attributeName= (String)it.next();
+            if (alreadyWritten.contains(attributeName)) {
+                continue;
+            }
+            out.print( attributeName );
+            out.write( s_equals_quot );
+            out.print( attributes.getAttribute(attributeName) );
+            out.write( s_quote_space );
+            alreadyWritten.add(attributeName);
         }
     }
 }

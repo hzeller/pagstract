@@ -36,10 +36,15 @@ import org.pagstract.view.template.parser.ast.TileNode;
 import org.pagstract.view.template.parser.ast.ValueNode;
 import org.pagstract.view.template.parser.ast.Visitor;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * A Visitor that emits Template Pages into a Device.
  */
 public class TemplatePageEmitter implements Visitor {
+    private static final Log _log = LogFactory.getLog(TemplatePageEmitter.class);
+
     protected final NameResolver     _nameResolver;
     protected final TemplateResolver _templateResolver;
     protected final ActionUrlProvider _urlProvider;
@@ -138,9 +143,11 @@ public class TemplatePageEmitter implements Visitor {
         catch (InvocationTargetException ie) {
             _out.print("<!--" + ie.getMessage() + ": "
                        + ie.getTargetException() + "-->");
+            _log.error("Exception rendering", ie);
         }
         catch (Exception e) {
             _out.print("<!-- " + e.getMessage() + " -->");
+            _log.error("Exception rendering", e);
         }
     }
 
@@ -171,14 +178,23 @@ public class TemplatePageEmitter implements Visitor {
             return;
         }
         
+        Integer startPos = node.getStartPos();
+        int start = (startPos != null) ? startPos.intValue() : 0;
+        // vorausnudeln .. unhübsch..
+        for (int consume = 0; consume < start && nsIt.hasNext(); ++consume) {
+            nsIt.next();
+        }
+
         boolean hasAnyContent = nsIt.hasNext();
 
         if (hasAnyContent && node.getHeader() != null) {
             node.getHeader().accept(this);
         }
 
-        int i = 0;
-        for (int index=0; nsIt.hasNext(); ++index) {
+        int max = ((node.getCount() != null)
+                   ? node.getCount().intValue() + start
+                   : -1);
+        for (int index=start; nsIt.hasNext() && (max < 0 || index < max); ++index) {
             Namespace ns = (Namespace) nsIt.next();
             
             try {

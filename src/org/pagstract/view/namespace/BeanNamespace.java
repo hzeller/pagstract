@@ -18,11 +18,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * A Namespace that handles the instance of an bean object as a namspace
  * of properties to be accessed.
  */
 public class BeanNamespace extends ClassNamespace {
+    private static final Log _log = LogFactory.getLog(BeanNamespace.class);
+
     private static final Object[] EMPTY_PARAM_LIST = new Object[]{};
     private final Object _bean;
 
@@ -45,7 +50,7 @@ public class BeanNamespace extends ClassNamespace {
         if (object == null) {
             // ok, return a dummy
             Method getter = (Method) getGettersFor(_namespaceClass).get(name);
-            System.err.println("******** dummy zurück ..");
+            _log.debug("dummy zurück ..");
             return new BeanNamespace(getter.getReturnType(), null);
         }
         return new BeanNamespace(object);
@@ -54,7 +59,7 @@ public class BeanNamespace extends ClassNamespace {
     public Object getNamedObject(String name) 
         throws UnsupportedOperationException {
         if (_bean == null) {
-            System.err.println("******** leere bean .." + _namespaceClass);
+            _log.info("******** leere bean .." + _namespaceClass);
             return null;
         }
         Method getter = (Method) getGettersFor(_namespaceClass).get(name);
@@ -78,7 +83,7 @@ public class BeanNamespace extends ClassNamespace {
         if (isIteratableObject(name)) {
             Object[] array = (Object[]) getNamedObject(name);
             if (array == null) {
-                System.err.println("******** leeres array .." + name);
+                _log.debug("empty array" + name);
                 return null;
             }
             // quick hack:

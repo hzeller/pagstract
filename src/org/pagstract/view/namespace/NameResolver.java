@@ -16,6 +16,9 @@ import java.util.Iterator;
 import java.util.Stack;
 import java.util.StringTokenizer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * A NameResolver is able to resolve absolute and relative names.
  * 
@@ -33,7 +36,10 @@ import java.util.StringTokenizer;
  * @author Henner Zeller
  */
 public final class NameResolver {
+    private static final Log _log = LogFactory.getLog(NameResolver.class);
+
     private static final boolean DEBUG_PAG = true;
+
     private final Namespace _rootNamespace;
     private final Stack/*<Namespace>*/ _namespaceStack;
     private final Stack/*<Integer>*/ _iteratorIndexStack;
@@ -159,8 +165,8 @@ public final class NameResolver {
             name = tok.nextToken(); // we have at least this token: root-ns
             do {
                 if (DEBUG_PAG && !currentNamespace.containsName(name)) {
-                    System.err.println("there is no namespace named " + name
-                                       + " in namespace " + previousName);
+                    _log.info("there is no namespace named " + name
+                              + " in namespace " + previousName);
                 }
                 currentNamespace = currentNamespace.getSubNamespace(name);
                 previousName = name;
@@ -169,8 +175,8 @@ public final class NameResolver {
             while (tok.hasMoreElements());
         }
         if (DEBUG_PAG && !currentNamespace.containsName(name)) {
-            System.err.println("there is no element named " + name
-                               + " in namespace " + previousName);
+            _log.info("there is no element named " + name
+                      + " in namespace " + previousName);
         }
         /*
          * get LeafObject of last namespace.
@@ -198,8 +204,8 @@ public final class NameResolver {
             name = tok.nextToken(); // we have at least this token: root-ns
             do {
                 if (DEBUG_PAG && !currentNamespace.containsName(name)) {
-                    System.err.println("there is no namespace named " + name
-                                       + " in namespace " + previousName);
+                    _log.info("there is no namespace named " + name
+                              + " in namespace " + previousName);
                 }
                 currentNamespace = currentNamespace.getSubNamespace(name);
                 previousName = name;
@@ -208,8 +214,8 @@ public final class NameResolver {
             while (tok.hasMoreElements());
         }
         if (DEBUG_PAG && !currentNamespace.containsName(name)) {
-            System.err.println("there is no element named " + name
-                               + " in namespace " + previousName);
+            _log.info("there is no element named " + name
+                      + " in namespace " + previousName);
         }
         return currentNamespace.containsName(name);
     }
