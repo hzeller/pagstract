@@ -31,7 +31,7 @@ public class TemplatePageFactory implements PageFactory {
     private static TemplateResolver cache = null;
 
     protected final Device _out;
-    protected final String _basePath;
+    protected final ResourceResolver _templatePathResolver;
     protected final TemplateResolver _resolver;
     protected final ActionUrlProvider _urlProvider; 
     protected final ResourceResolver _resourceResolver;
@@ -44,7 +44,7 @@ public class TemplatePageFactory implements PageFactory {
             cache = new FileTemplateResolver();
         }
         _out = out;
-        _basePath = basePath;
+        _templatePathResolver = new PrefixResourceResolver(basePath);
         _resolver = cache;
         _urlProvider = null;
         _resourceResolver = null;
@@ -61,13 +61,49 @@ public class TemplatePageFactory implements PageFactory {
         this(out, basePath, resolver, urlProvider, null);
     }
     
+    /**
+     * Create a template page factory that creates pages that
+     * write to device 'out', find their templates relative to
+     * 'basePath' and resolve them via the given given TemplateResolver
+     * 'resolver'.
+     * URLs found in the page are treated by the 'urlProvider' and
+     * with 'resource://' referenced resources are resolved by the
+     * 'resourceResolver'.
+     */
     public TemplatePageFactory(Device out, String basePath, 
                                TemplateResolver resolver,
                                ActionUrlProvider urlProvider,
+                               ResourceResolver resourceResolver) {
+        this(out, new PrefixResourceResolver(basePath),
+             resolver, urlProvider, resourceResolver);
+    }
+
+    /**
+     * Create a template page factory that creates pages that
+     * write to device 'out', and finds the filesystem path of the
+     * templates with the 'templatePathResolver'. This resolver gets
+     * an absolute filename derived from the name of the page model: the
+     * non-qualified class name name is prefixed by '/' and sufficed by
+     * '.html'. A class foo.bar.MyStandardPage would translate to a
+     * template path '/MyStandardPage.html'. That in turn is resolved
+     * by the templatePathResolver.
+     * 
+     * The resulting template path is resolved to a template
+     * via the given given TemplateResolver 'resolver'.
+     *
+     * URLs found in the page are treated by the 'urlProvider' and
+     * with 'resource://' referenced resources are resolved by the
+     * 'resourceResolver'.
+     */
+    public TemplatePageFactory(Device out, 
+                               ResourceResolver templatePathResolver,
+                               TemplateResolver resolver,
+                               ActionUrlProvider urlProvider,
                                ResourceResolver resourceResolver)
+        
     {
         _out = out;
-        _basePath = basePath;
+        _templatePathResolver = templatePathResolver;
         _resolver = resolver;
         _urlProvider = urlProvider;
         _resourceResolver = resourceResolver;
@@ -93,15 +129,15 @@ public class TemplatePageFactory implements PageFactory {
     }
     
     /**
-     * returns the name of the JSP-Page, derived from the given class. 
+     * returns the name of the template-Page, derived from the given class. 
      * By default, the name is determined by the basePath + the name of
-     * the class + ".jsp".
+     * the class + ".html".
      * Override this, if you have a more detailed way to determine the name.
      */
-    protected String getTemplateNameFor(Class c) {
+    protected String getTemplateNameFor(Class c) throws Exception {
         String name = c.getName();
         name = name.substring(name.lastIndexOf(".") + 1);
-        return _basePath + "/" + name + ".html";
+        return _templatePathResolver.resolveResource("/" + name + ".html");
     }
 }
 

@@ -12,10 +12,10 @@
  */
 package org.pagstract.view.template;
 
-import org.pagstract.view.template.parser.ast.TemplateNode;
-
 /**
- * A Resolver that resolve abstract resource names to 'real' resources.
+ * A Resolver that resolves an abstract resource path to a 'real'
+ * resource. This might translate relative path to absolute ones for
+ * instance.
  */
 public interface ResourceResolver {
     /**

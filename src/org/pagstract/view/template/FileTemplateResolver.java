@@ -30,15 +30,39 @@ import org.pagstract.view.template.parser.scanner.TemplateScanner;
  */
 public class FileTemplateResolver implements TemplateResolver {
     private final Map/*<canonicalFilenameString,TemplateNode>*/ _parsed;
+    private final ResourceResolver _resourceResolver;
+
     private ParseListener _parseListener;
-    
+
+
     public interface ParseListener {
         void beforeParsing(File file);
         void afterParsing(File file, TemplateNode rootNode);
     }
 
+    /**
+     * create a template resolver that takes the given template files
+     * 'as-is'
+     */
     public FileTemplateResolver() {
+        this("");
+    }
+
+    /**
+     * create a template resolver that prepends a prefix to each template
+     * name it gets.
+     */
+    public FileTemplateResolver(String prefix) {
+        this(new PrefixResourceResolver(prefix));
+    }
+    
+    /**
+     * create a template resolver with a user provided mapping between
+     * abstract filenames and their concrete counterparts.
+     */
+    public FileTemplateResolver(ResourceResolver resourceResolver) {
         _parsed = new HashMap();
+        _resourceResolver = resourceResolver;
     }
 
     public void setParseListener(ParseListener l) {
@@ -53,19 +77,13 @@ public class FileTemplateResolver implements TemplateResolver {
                                                 String relativeResource) 
         throws Exception 
     {
-        File file = new File(relativeResource);
-        if (!file.isAbsolute() && parentResource != null) {
-            //either, this is a directory ..  /foo/
-            File parent = new File(parentResource);
+        String resourceName = PathUtil.combinePath(parentResource, relativeResource);
+        resourceName = PathUtil.normalizePath(resourceName);
 
-            // .. or another file, whose parent directory is the starting
-            // point  /foo/IncludingFile.html
-            if (!parent.isDirectory()) {
-                parent = parent.getParentFile();
-            }
-            file = new File(parent, relativeResource);
-        }
-        String canonicalName = file.getCanonicalPath();
+        final String resource =_resourceResolver.resolveResource(resourceName);
+        final File file = new File(resource);
+
+        final String canonicalName = file.getCanonicalPath();
         FileCache cache;
 
         synchronized (_parsed) {
@@ -99,6 +117,50 @@ public class FileTemplateResolver implements TemplateResolver {
                 return cache.getTemplateRootNode();
             }
         }
+    }
+
+    /**
+     * normalizes a path: removes all ./ and ../ and multiple slashes ///
+     * If ../ go beyond root, just make it absoulte.
+     */
+    private String normalizePath(String file) {
+        StringBuffer result = new StringBuffer();
+        int lastSlash = 0;
+        // if we start with './' -> remove; with '../' -> make absolute: '/'
+        while (file.startsWith("./") || file.startsWith("../")) {
+            file = file.substring(2);
+        }
+        final int len = file.length();
+        int i = 0;
+        while (i < len) {
+            if (file.charAt(i) == '/') {
+                while (i < len-1 && file.charAt(i+1) == '/')
+                    ++i;
+                if (i < len-2 && file.charAt(i+1) == '.') {
+                    switch (file.charAt(i+2)) {
+                    case '/':    /*** /./ ***/
+                        i += 2;
+                        continue;
+                    case '.':    /*** /../ ***/
+                        if (i < len-3 && file.charAt(i+3) == '/') {
+                            i+=3;
+                        }
+                        for (int j = result.length()-1; j >= 0; --j) {
+                            if (j == 0 || result.charAt(j) == '/') {
+                                result.setLength(j);
+                                break;
+                            }
+                        }
+                        continue;
+                    }
+                }
+            }
+            char c = file.charAt(i);
+            result.append(c);
+            if (c == '/') lastSlash = i;
+            ++i;
+        }
+        return result.toString();
     }
 
     private static final class FileCache {
