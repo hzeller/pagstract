@@ -30,6 +30,7 @@ public class InputFieldRenderer implements ComponentRenderer {
     private static final byte[] s_input         = "<input".getBytes();
     private static final byte[] s_name_eq       = " name=\"".getBytes();
     private static final byte[] s_value_eq      = " value=\"".getBytes();
+    private static final byte[] s_type_eq       = " type=\"".getBytes();
     private static final byte[] s_quot          = "\" ".getBytes();
     private static final byte[] s_equals_quot   = "=\"".getBytes();
     private static final byte[] s_close_tag     = "/>".getBytes();
@@ -52,12 +53,11 @@ public class InputFieldRenderer implements ComponentRenderer {
         TemplateToken origTag = node.getTemplateToken();
         
         boolean isEnabled = true;
-        
+        boolean isVisible = true;
+
         if (inputValue instanceof ComponentModel) {
             ComponentModel model = (ComponentModel) inputValue;
-            if (!model.isVisible()) {
-                return;
-            }
+            isVisible = model.isVisible();
             isEnabled = model.isEnabled();
         }
 
@@ -91,9 +91,18 @@ public class InputFieldRenderer implements ComponentRenderer {
         /*
          * checkbox/radio-buttons
          */
-        String inputType = origTag.getAttribute("type");
+        String inputType = isVisible ? origTag.getAttribute("type") : "hidden";
         boolean checkableInput = ("checkbox".equals(inputType) 
                                   || "radio".equals(inputType));
+        /*
+         * FIXME: if we rewrite this to hidden, then only _one_
+         * variable for checkableInputs must be emitted.
+         */
+        // input type..
+        out.write(s_type_eq);
+        out.print(inputType);
+        out.write(s_quot);
+
         if (checkableInput) {
             String templateValue = origTag.getAttribute("value");
             if (value.equals(templateValue)) {
@@ -119,7 +128,8 @@ public class InputFieldRenderer implements ComponentRenderer {
         while( it.hasNext()) {
             String attributeName= (String)it.next();
             if ("pma:name".equals(attributeName) 
-                || "name".equalsIgnoreCase(attributeName)) {
+                || "name".equalsIgnoreCase(attributeName)
+                || "type".equalsIgnoreCase(attributeName)) {
                 continue;
             }
             out.print( attributeName );
