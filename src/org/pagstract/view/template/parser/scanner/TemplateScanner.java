@@ -111,7 +111,7 @@ public class TemplateScanner implements Scanner {
         new BasicToken("}",          -1, true),
 
         // that single token must be the last one..
-        (new BasicToken("=\"resource://",sym.ResourceResolver)).setResourceExp()
+        (new BasicToken("\"resource://",sym.ResourceResolver)).setResourceExp()
     };
 
     private final static TokenMatchPattern MATCH_PATTERN;

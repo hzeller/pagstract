@@ -16,7 +16,8 @@ import org.pagstract.view.template.parser.scanner.FilePosition;
 import org.pagstract.view.template.parser.scanner.SimpleTemplateToken;
 
 public final class ResourceNode implements TemplateNode {
-    private final static int REMOVE_FIRST = "resource:/".length();
+    // leave the leading slash..
+    private final static int REMOVE_FIRST = "resource:".length();
     private final FilePosition _pos;
     private final String _resource;
 

@@ -86,6 +86,8 @@ public final class NameResolver {
             }
 
             int stackPos = _namespaceStack.size() - depth - 1;
+	    // FIXME: if this will result in an ArrayIndexOutOfBoundsException
+	    // --> make better error message
             Namespace currentNs = (Namespace) _namespaceStack.get(stackPos);
 
             return resolveName(currentNs, name);

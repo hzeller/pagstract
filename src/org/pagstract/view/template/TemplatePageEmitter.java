@@ -239,9 +239,10 @@ public class TemplatePageEmitter implements Visitor {
     }
 
     public void visit(ResourceNode node) throws Exception {
-        // FIXME: call resource resolver here.
-        _out.print("=\"" + resolveResource(node.getResourceValue(),
-                                           node.getPosition()) + "\"");
+        _out.print("\"" 
+                   + resolveResource(node.getResourceValue(),
+                                     node.getPosition()) 
+                   + "\"");
     }
 
     public void visit(BeanNode node) throws Exception {
