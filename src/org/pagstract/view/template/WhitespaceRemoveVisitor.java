@@ -27,6 +27,7 @@ import org.pagstract.view.template.parser.ast.TemplateNode;
 import org.pagstract.view.template.parser.ast.TileNode;
 import org.pagstract.view.template.parser.ast.ValueNode;
 import org.pagstract.view.template.parser.ast.IfVisibleNode;
+import org.pagstract.view.template.parser.ast.ResourceNode;
 import org.pagstract.view.template.parser.ast.Visitor;
 
 /**
@@ -124,6 +125,9 @@ public class WhitespaceRemoveVisitor implements Visitor {
     }
 
     public void visit(ValueNode node) {
+    }
+
+    public void visit(ResourceNode node) {
     }
 
     public void visit(IfVisibleNode node) throws Exception {

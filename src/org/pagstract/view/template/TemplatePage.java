@@ -39,7 +39,8 @@ class TemplatePage implements Page {
                  Namespace rootNamespace, TemplateResolver templateResolver,
                  PageModel model,
                  TemplateNode rootNode,
-                 Device out, ActionUrlProvider urlProvider)
+                 Device out, ActionUrlProvider urlProvider,
+                 ResourceResolver resourceResolver) 
     {
         NameResolver resolver = new NameResolver(rootNamespace);
         //_templatePageEmitter = new TemplatePageEmitter(out, resolver);
@@ -48,7 +49,8 @@ class TemplatePage implements Page {
         _templatePageEmitter= new TemplatePageEmitter(resourceName,out,
                                                       resolver,
                                                       templateResolver,
-                                                      urlProvider);
+                                                      urlProvider,
+                                                      resourceResolver);
         /*
          FIXME: this must be optimized; the JS does not change.
         _templatePageEmitter1= new JavaScriptGenerator(code, functionMappings);

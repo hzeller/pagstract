@@ -42,7 +42,7 @@ terminal TemplateToken LinkStart, LinkEnd,
                   SwitchStart, SwitchEnd,
                   InputStart, InputEnd, InputSimple,
                   FormStart, FormEnd,                  
-                  BeanStart, BeanEnd, 
+                  BeanStart, BeanEnd,        
                   IfVisibleStart, IfVisibleEnd,
                   ValueStart, ValueEnd, ValueSimple,
                   SelectFieldStart, SelectFieldEnd, SelectFieldSimple,
@@ -56,6 +56,8 @@ terminal TemplateToken LinkStart, LinkEnd,
                   ListFooterStart, ListFooterEnd,
 
                   TileStart, TileEnd, TileSimple;
+
+terminal SimpleTemplateToken ResourceResolver;
 
 //terminal TemplateToken    TextareaStart, TextareaEnd, TextareaSimple
 
@@ -73,6 +75,7 @@ non terminal TileNode          TileTag;
 non terminal NodeSequence      Sequence;
 non terminal ConstantNode      ConstantTag;
 non terminal SwitchNode        SwitchTag;
+non terminal ResourceNode      ResourceTag;
 non terminal Map               CaseList;
 non terminal TemplateNode      IgnoredSequence;
 non terminal ListContentContainer ListContentSequence;
@@ -100,6 +103,7 @@ SomeTag ::=
         | IfVisibleTag:t {: RESULT= t; :}
         | SwitchTag:t    {: RESULT= t; :}
         | ConstantTag:t  {: RESULT= t; :}
+        | ResourceTag:t  {: RESULT= t; :}
         | ValueTag:t     {: RESULT= t; :}
         | TileTag:t      {: RESULT= t; :}
         ;
@@ -178,6 +182,10 @@ ValueTag ::=
                                                  v.getFilePosition()); :}
         | ValueSimple:v {: RESULT= new ValueNode( v.getModelName(), v.getRaw(),
                                                   v.getFilePosition()); :} 
+        ;
+
+ResourceTag ::= 
+        ResourceResolver:r {: RESULT = new ResourceNode(r); :}
         ;
 
 TileTag ::=

@@ -34,7 +34,8 @@ public class TemplatePageFactory implements PageFactory {
     protected final String _basePath;
     protected final TemplateResolver _resolver;
     protected final ActionUrlProvider _urlProvider; 
-    
+    protected final ResourceResolver _resourceResolver;
+
     /**
      * @deprecated call with explicit resolver instead.
      */
@@ -46,23 +47,32 @@ public class TemplatePageFactory implements PageFactory {
         _basePath = basePath;
         _resolver = cache;
         _urlProvider = null;
+        _resourceResolver = null;
     }
 
     public TemplatePageFactory(Device out, String basePath,
                                TemplateResolver resolver) {
-        this(out, basePath, resolver, null);
+        this(out, basePath, resolver, null, null);
+    }
+
+    public TemplatePageFactory(Device out, String basePath, 
+                               TemplateResolver resolver,
+                               ActionUrlProvider urlProvider) {
+        this(out, basePath, resolver, urlProvider, null);
     }
     
     public TemplatePageFactory(Device out, String basePath, 
                                TemplateResolver resolver,
-                               ActionUrlProvider urlProvider)
+                               ActionUrlProvider urlProvider,
+                               ResourceResolver resourceResolver)
     {
         _out = out;
         _basePath = basePath;
         _resolver = resolver;
         _urlProvider = urlProvider;
+        _resourceResolver = resourceResolver;
     }
-
+    
     /**
      * returns the device this page factory writes to.
      */
@@ -78,7 +88,8 @@ public class TemplatePageFactory implements PageFactory {
         String filename = getTemplateNameFor(pageModelClass);
         TemplateNode rootNode = _resolver.resolveTemplate(filename);
         return new TemplatePage(filename, rootNamespace, _resolver, model, 
-                                rootNode, _out, _urlProvider);
+                                rootNode, _out, _urlProvider, 
+                                _resourceResolver);
     }
     
     /**
@@ -92,7 +103,6 @@ public class TemplatePageFactory implements PageFactory {
         name = name.substring(name.lastIndexOf(".") + 1);
         return _basePath + "/" + name + ".html";
     }
-
 }
 
 /* Emacs: 

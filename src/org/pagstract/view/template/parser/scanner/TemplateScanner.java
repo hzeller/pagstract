@@ -44,6 +44,7 @@ import org.pagstract.view.template.parser.sym;
  * </pre>
  */
 public class TemplateScanner implements Scanner {
+    /** expand necessary to use pagstract in java script */
     private final static boolean EXPAND_HTML_COMMENTS = true;
     private final static int MAX_TAGATTRIBUTE_AREA = 8192;
 
@@ -105,7 +106,10 @@ public class TemplateScanner implements Scanner {
 
         // these are handled special..
         new BasicToken("${",         sym.ValueSimple, true),
-        new BasicToken("}",          -1, true)
+        new BasicToken("}",          -1, true),
+
+        // that single token must be the last one..
+        (new BasicToken("=\"resource://", sym.ResourceResolver)).setResourceExp()
     };
 
     private final static TokenMatchPattern MATCH_PATTERN;
@@ -196,9 +200,11 @@ public class TemplateScanner implements Scanner {
         _recordingStream.resetRecording();
         _resourceName = resourceName;
         _nextSymbol = null;
+        /*
         if (TOKENS.length % 2 != 0) { // assert would be cool here.
             throw new IllegalArgumentException("PAGSTRACT DEVELOPER: there must be an even number of tokens..");
         }
+        */
         _nestedTag = new int[ TOKENS.length / 2 ];
     }
 
@@ -279,7 +285,23 @@ public class TemplateScanner implements Scanner {
 
             recordedTagBeginPos = _recordingStream.getMarkedPosition();
             
-            if (token.isStartToken() && token.isDollarExpansion()) {
+            // das folgende ist doch ein wenig gehackt..
+            if (token.isResourceExpansion()) {
+                int c;
+                do {
+                    c = _in.read();
+                }
+                while (c >= 0 && c != '"');
+                byte[] range = _recordingStream
+                    .getBuffer(recordedTagBeginPos+1,
+                               _recordingStream.getCurrentPosition()-1);
+                final String resourceName = new String(range);
+                FilePosition pos = new FilePosition(_resourceName,tagStartPos);
+                SimpleTemplateToken tok = new SimpleTemplateToken(pos,
+                                                                  resourceName);
+                _nextSymbol = new Symbol(sym.ResourceResolver, tok);
+            }
+            else if (token.isStartToken() && token.isDollarExpansion()) {
                 tokenNum = _tokenMatcher.nextToken();
                 if (tokenNum == -1 
                     || !TOKENS[tokenNum].isDollarExpansion()
@@ -428,6 +450,7 @@ public class TemplateScanner implements Scanner {
         private final boolean _isPmaSpecial;
         private final boolean _isStartSymbol;
         private final boolean _dollarExp;
+        private boolean _resourceExp;
         
         BasicToken(String keyword) {
             this(keyword, -1, false);
@@ -450,7 +473,6 @@ public class TemplateScanner implements Scanner {
              */
             _isStartSymbol = (dollarExp && end != -1);
             _dollarExp = dollarExp;
-
         }
         
         /**
@@ -468,6 +490,11 @@ public class TemplateScanner implements Scanner {
             _dollarExp = false;
         }
         
+        public BasicToken setResourceExp() { 
+            _resourceExp = true; 
+            return this; 
+        }
+
         public boolean isStartToken()   { return _isStartSymbol; }
         public String getKeyword()      { return _keyword; }
         public int getSymbol()       { return _symbol; }
@@ -480,6 +507,7 @@ public class TemplateScanner implements Scanner {
         public boolean isPmaSpecial() { return _isPmaSpecial; }
 
         public boolean isDollarExpansion() { return _dollarExp; }
+        public boolean isResourceExpansion() { return _resourceExp; }
     }
 }
 

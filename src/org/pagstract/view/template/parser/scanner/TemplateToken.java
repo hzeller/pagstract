@@ -17,7 +17,7 @@ import java.util.Map;
 import org.pagstract.model.AttributeSet;
 
 /**
- * Ein TemplateToken hat eine Position im File.
+ * Ein TemplateToken hat eine Position im File. (AttributedTemplateToken)
  */
 public class TemplateToken implements AttributeSet {
     private final FilePosition _position;

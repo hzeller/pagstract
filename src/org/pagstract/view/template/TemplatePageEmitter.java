@@ -37,7 +37,9 @@ import org.pagstract.view.template.parser.ast.TemplateNode;
 import org.pagstract.view.template.parser.ast.TileNode;
 import org.pagstract.view.template.parser.ast.ValueNode;
 import org.pagstract.view.template.parser.ast.IfVisibleNode;
+import org.pagstract.view.template.parser.ast.ResourceNode;
 import org.pagstract.view.template.parser.ast.Visitor;
+import org.pagstract.view.template.parser.scanner.FilePosition;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,8 +48,9 @@ import org.apache.commons.logging.LogFactory;
  * A Visitor that emits Template Pages into a Device.
  */
 public class TemplatePageEmitter implements Visitor {
+    private final static int RESOURCE_REMOVE_FIRST = "resource:/".length();
     private static final Log _log = LogFactory.getLog(TemplatePageEmitter.class);
-
+    protected final ResourceResolver _resourceResolver;
     protected final NameResolver     _nameResolver;
     protected final TemplateResolver _templateResolver;
     protected final ActionUrlProvider _urlProvider;
@@ -67,18 +70,20 @@ public class TemplatePageEmitter implements Visitor {
                                Device out, 
                                NameResolver nameResolver,
                                TemplateResolver templateResolver) {
-        this(resourceName, out, nameResolver, templateResolver, null);
+        this(resourceName, out, nameResolver, templateResolver, null, null);
     }
     
     public TemplatePageEmitter(String resourceName,
                                Device out, 
                                NameResolver nameResolver,
                                TemplateResolver templateResolver,
-                               ActionUrlProvider urlProvider) 
+                               ActionUrlProvider urlProvider,
+                               ResourceResolver resourceResolver) 
     {
         _out = out;
         _nameResolver = nameResolver;
         _templateResolver = templateResolver;
+        _resourceResolver = resourceResolver;
         _parentResource = resourceName;
         _urlProvider = urlProvider;
     }
@@ -134,6 +139,10 @@ public class TemplatePageEmitter implements Visitor {
 
         if (resourceName == null || resourceName.length() == 0) {
             return;
+        }
+
+        if (resourceName.startsWith("resource://")) {
+            resourceName = resolveResource(resourceName.substring( RESOURCE_REMOVE_FIRST ), node.getPosition());
         }
 
         TemplateNode resourceNode;
@@ -229,6 +238,12 @@ public class TemplatePageEmitter implements Visitor {
         renderer.render(this, node, value, _out);
     }
 
+    public void visit(ResourceNode node) throws Exception {
+        // FIXME: call resource resolver here.
+        _out.print("=\"" + resolveResource(node.getResourceValue(),
+                                           node.getPosition()) + "\"");
+    }
+
     public void visit(BeanNode node) throws Exception {
         NamingContext ctxt = resolveNameCtxt(node);
         if (ctxt == null) {
@@ -322,6 +337,20 @@ public class TemplatePageEmitter implements Visitor {
 
     private void writeHiddenMessage(String msg) throws IOException {
         _out.print("<!-- " + msg + " -->");
+    }
+
+    private final String resolveResource(String resource, FilePosition pos) {
+        if (_resourceResolver == null) {
+            return resource;
+        }
+        try {
+            return _resourceResolver.resolveResource(resource);
+        }
+        catch (Exception e) {
+            _log.error("problem resolving resource '" + resource + "' "
+                       + "at " + pos, e);
+        }
+        return "";
     }
 
     private final Object resolveNamedObject(NamedTemplateNode node) 
