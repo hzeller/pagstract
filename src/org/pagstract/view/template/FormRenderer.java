@@ -13,12 +13,14 @@
 package org.pagstract.view.template;
 
 import java.io.IOException;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import org.pagstract.io.Device;
 import org.pagstract.model.ActionModel;
+import org.pagstract.model.AttributeSet;
 import org.pagstract.view.template.parser.ast.FormNode;
 import org.pagstract.view.template.parser.ast.TemplateNode;
 import org.pagstract.view.template.parser.ast.Visitor;
@@ -77,6 +79,7 @@ public class FormRenderer implements ComponentRenderer {
             out.write( s_form );
 	
             // print all parameters of the tag, except pma:name
+            final Set alreadyWritten = new HashSet();
             TemplateToken origTag = node.getTemplateToken();
             Iterator it = origTag.getAttributeNames();
             while( it.hasNext()) {
@@ -88,7 +91,13 @@ public class FormRenderer implements ComponentRenderer {
                 out.write( s_equals_quot );
                 out.print( origTag.getAttribute(attributeName) );
                 out.write( s_quote_space );
-            }  
+                alreadyWritten.add(attributeName);
+            }
+
+            if (value instanceof AttributeSet) {
+                AttributeSet givenSet = (AttributeSet) value;
+                appendAttributes(out, alreadyWritten, givenSet);
+            }
 
             // write out the action
             String url = action.getUrl();
@@ -160,6 +169,25 @@ public class FormRenderer implements ComponentRenderer {
         
         if (action.isEnabled()) {
             out.write(s_end_form_tag);
+        }
+    }
+
+    private void appendAttributes(Device out, Set alreadyWritten, 
+                                  AttributeSet attributes) 
+        throws IOException
+    {
+        if (attributes == null) return;
+        Iterator it = attributes.getAttributeNames();
+        while (it.hasNext()) {
+            String attributeName= (String)it.next();
+            if (alreadyWritten.contains(attributeName.toLowerCase())) {
+                continue;
+            }
+            out.print( attributeName );
+            out.write( s_equals_quot );
+            out.print( attributes.getAttribute(attributeName) );
+            out.write( s_quote_space );
+            alreadyWritten.add(attributeName);
         }
     }
 }

@@ -83,6 +83,8 @@ public class TemplateScanner implements Scanner {
         new BasicToken("</pma:tile>",  sym.TileEnd),
         new BasicToken("<a ",          sym.LinkStart, -1, "pma:name"),
         new BasicToken("</a>",         sym.LinkEnd),
+        new BasicToken("<area ",       sym.AreaStart, sym.AreaSimple, "pma:name"),
+        new BasicToken("</area>",      sym.AreaEnd),
         new BasicToken("<input ",      sym.InputStart, sym.InputSimple, 
                        "pma:name"),
         new BasicToken("</input>",     sym.InputEnd),

@@ -116,6 +116,16 @@ public class TemplatePageFactory implements PageFactory {
         return _out;
     }
 
+    /**
+     * creates a Page that does have the same content but writes
+     * to another output-Device
+     */
+    public Page clonePageContent(Page otherPage) throws Exception {
+        TemplatePage page = (TemplatePage) otherPage;
+        return page.createCopy(_resolver, _out, _urlProvider,
+                               _resourceResolver);
+    }
+
     public Page createPageFor(Class pageModelClass) throws Exception {
         Map valueMap = new HashMap();
         PageModel model = (DynamicMapPageModelProxy

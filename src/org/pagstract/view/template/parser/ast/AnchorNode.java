@@ -16,12 +16,19 @@ import org.pagstract.view.template.parser.scanner.TemplateToken;
 
 public final class AnchorNode extends AbstractTemplateContentNode {
     private final TemplateToken    _tag;
+    private final String _linkType;
 
-    public AnchorNode( String model_name, TemplateNode content,
+    public AnchorNode( String linkType,
+                       String model_name, TemplateNode content,
                        TemplateToken tag) 
     {
         super(model_name, content, tag.getFilePosition());
         _tag = tag;
+        _linkType = linkType;
+    }
+
+    public String getLinkType() {
+        return _linkType;
     }
 
     public TemplateToken getTemplateToken() {

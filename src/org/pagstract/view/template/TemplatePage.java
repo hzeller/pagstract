@@ -30,6 +30,8 @@ import org.pagstract.view.template.parser.ast.Visitor;
 class TemplatePage implements Page {
     //private final Visitor _templatePageEmitter1;
     //private final Visitor _templatePageEmitter2;
+    private final String _pageName;
+    private final Namespace _rootNamespace;
     private final Visitor _templatePageEmitter;
     private final PageModel _model;
     private final TemplateNode _rootNode;
@@ -44,8 +46,8 @@ class TemplatePage implements Page {
     {
         NameResolver resolver = new NameResolver(rootNamespace);
         //_templatePageEmitter = new TemplatePageEmitter(out, resolver);
-        StringBuffer code = new StringBuffer();
-        Map functionMappings = new HashMap();
+        //StringBuffer code = new StringBuffer();
+        //Map functionMappings = new HashMap();
         _templatePageEmitter= new TemplatePageEmitter(resourceName,out,
                                                       resolver,
                                                       templateResolver,
@@ -61,9 +63,19 @@ class TemplatePage implements Page {
                                                           functionMappings,
                                                           urlProvider);
         */
+        _rootNamespace = rootNamespace;
+        _pageName = resourceName;
         _out = out;
         _rootNode = rootNode;
         _model = model;
+    }
+
+    TemplatePage createCopy(TemplateResolver resolver, Device out,
+                            ActionUrlProvider urlProvider, 
+                            ResourceResolver resourceResolver) {
+        return new TemplatePage(_pageName, _rootNamespace,
+                                resolver, _model, _rootNode, out, urlProvider,
+                                resourceResolver);
     }
 
     /**

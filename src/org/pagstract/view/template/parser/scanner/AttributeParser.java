@@ -18,13 +18,17 @@ import java.io.StringReader;
 import java.util.Map;
 
 /**
- * some hacky utility class.
+ * some hacky utility class. A parser for Attributes.
  */
 public class AttributeParser {
     private final static char singleQuote = '\'';
     private final static char doubleQuote = '\"';
-    final Map _attr;
+    private final Map _attr;
 
+    /**
+     * Creates an Attribute-parser that stores the attributes
+     * found in the given map.
+     */
     public AttributeParser(Map attributes)
         throws IOException {
 	_attr = attributes;

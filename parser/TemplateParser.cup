@@ -46,26 +46,28 @@ parser code {:
 
 terminal byte[]        Bytes;
 
-terminal TemplateToken LinkStart, LinkEnd,
-                  SwitchStart, SwitchEnd,
-                  InputStart, InputEnd, InputSimple,
-                  FormStart, FormEnd,                  
-                  BeanStart, BeanEnd,        
-                  IfVisibleStart, IfVisibleEnd,
-                  DebugStart, DebugEnd, DebugSimple,
-                  ValueStart, ValueEnd, ValueSimple,
-                  SelectFieldStart, SelectFieldEnd, SelectFieldSimple,
-                  ObjectStart, ObjectEnd,
+terminal TemplateToken 
+         LinkStart, LinkEnd,
+         AreaStart, AreaSimple, AreaEnd,
+         SwitchStart, SwitchEnd,
+         InputStart, InputEnd, InputSimple,
+         FormStart, FormEnd,                  
+         BeanStart, BeanEnd,        
+         IfVisibleStart, IfVisibleEnd,
+         DebugStart, DebugEnd, DebugSimple,
+         ValueStart, ValueEnd, ValueSimple,
+         SelectFieldStart, SelectFieldEnd, SelectFieldSimple,
+         ObjectStart, ObjectEnd,
                   
-                  //-- list specific stuff
-                  ListStart, ListEnd, ListSimple,
-                  ListHeaderStart, ListHeaderEnd,
-                  ListContentStart, ListContentEnd,
-                  ListNoContentStart, ListNoContentEnd,
-                  ListSeparatorStart, ListSeparatorEnd,
-                  ListFooterStart, ListFooterEnd,
-                  ListGroupStart, ListGroupEnd,
-                  TileStart, TileEnd, TileSimple;
+         //-- list specific stuff
+         ListStart, ListEnd, ListSimple,
+         ListHeaderStart, ListHeaderEnd,
+         ListContentStart, ListContentEnd,
+         ListNoContentStart, ListNoContentEnd,
+         ListSeparatorStart, ListSeparatorEnd,
+         ListFooterStart, ListFooterEnd,
+         ListGroupStart, ListGroupEnd,
+         TileStart, TileEnd, TileSimple;
 
 terminal SimpleTemplateToken ResourceResolver;
 
@@ -134,7 +136,10 @@ SelectFieldTag ::=
         ;
 
 LinkTag ::= 
-         LinkStart:l Sequence:s LinkEnd {: RESULT= new AnchorNode( l.getModelName(), s, l); :}
+          LinkStart:l Sequence:s LinkEnd {: RESULT= new AnchorNode("a", l.getModelName(), s, l); :}
+        | AreaStart:l AreaEnd {: RESULT= new AnchorNode("area", l.getModelName(), null, l); :}
+        | AreaSimple:l {: RESULT= new AnchorNode("area", l.getModelName(), null, l); :}
+        | AreaStart:l {: RESULT= new AnchorNode("area", l.getModelName(), null, l); :}
         ;
 
 FormTag ::= 

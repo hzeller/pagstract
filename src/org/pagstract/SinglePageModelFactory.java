@@ -104,6 +104,14 @@ public class SinglePageModelFactory implements PageModelFactory {
     }
 
     /**
+     * returns the page created in the course of the lifetime of
+     * this SinglePageModelFactory or 'null', of none has been created yet.
+     */
+    public Page getCreatedPage() {
+        return _page;
+    }
+
+    /**
      * Add a render listener that is informed on rendering.
      */
     public void addRenderListener(RenderListener listener) {

@@ -15,9 +15,12 @@ package org.pagstract.view.template;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.pagstract.io.Device;
 import org.pagstract.model.ActionModel;
+import org.pagstract.model.AttributeSet;
 import org.pagstract.model.ComponentModel;
 import org.pagstract.model.SingleValueModel;
 import org.pagstract.view.template.parser.ast.AnchorNode;
@@ -36,11 +39,17 @@ public class AnchorRenderer implements ComponentRenderer {
     private static final Log _log = LogFactory.getLog(AnchorRenderer.class);
 
     private static final byte[] s_a_href     = "<a href=\"".getBytes();
+    private static final byte[] s_area_href  = "<area href=\"".getBytes();
     private static final byte[] s_questmark  = "?".getBytes();
     private static final byte[] s_equals     = "=".getBytes();
     private static final byte[] s_ampersand  = "&amp;".getBytes();
     private static final byte[] s_closebracket = ">".getBytes();
     private static final byte[] s_end_a_tag  = "</a>".getBytes();
+    
+    private static final byte[] s_quote_space= "\" ".getBytes();
+    private static final byte[] s_slash      = "/".getBytes();
+    private static final byte[] s_equals_quot   = "=\"".getBytes();
+
     private ActionUrlProvider _urlProvider;
 
     public AnchorRenderer(ActionUrlProvider urlProvider) {
@@ -97,9 +106,6 @@ public class AnchorRenderer implements ComponentRenderer {
         TemplateToken origTag = node.getTemplateToken();
 
         TemplateNode templateContent = node.getTemplateContent();
-        if (templateContent == null) {
-            return;
-        }
         
         boolean enabled = (value != null);
 
@@ -113,7 +119,8 @@ public class AnchorRenderer implements ComponentRenderer {
         }
         
         String actionUrl = null;
-        
+        final boolean isArea = "area".equals(node.getLinkType());
+
         /*
          * If this is an action model: build the URL right
          * from it.
@@ -135,9 +142,10 @@ public class AnchorRenderer implements ComponentRenderer {
          * Versuch. Wenn das gut ist, dann kommt es mit ins
          * modell
          */
+        final Set alreadyWritten = new HashSet();
         boolean wroteSpan = false;
         if (enabled) {
-            out.write( s_a_href );
+            out.write( isArea ? s_area_href : s_a_href );
             out.print( actionUrl );
             out.print("\"");
 
@@ -169,6 +177,14 @@ public class AnchorRenderer implements ComponentRenderer {
                 out.print( "=\"" );
                 out.print( origTag.getAttribute(attributeName) );
                 out.print( "\"" );
+                alreadyWritten.add(tagAttribute);
+            }
+            if (value instanceof AttributeSet) {
+                AttributeSet givenSet = (AttributeSet) value;
+                appendAttributes(out, alreadyWritten, givenSet);
+            }
+            if (isArea) {
+                out.write( s_slash );
             }
             out.write( s_closebracket);
         }
@@ -210,24 +226,45 @@ public class AnchorRenderer implements ComponentRenderer {
             }
         }
         
-        try {
-            templateContent.accept(renderVisitor);
-        }
-        catch (RuntimeException e) {
-            throw e;
-        }
-        catch (IOException e) {
-            throw e;
-        }
-        catch (Exception e) {
-            throw new RenderException(e);
+        if (templateContent != null) {
+            try {
+                templateContent.accept(renderVisitor);
+            }
+            catch (RuntimeException e) {
+                throw e;
+            }
+            catch (IOException e) {
+                throw e;
+            }
+            catch (Exception e) {
+                throw new RenderException(e);
+            }
         }
         
-        if (enabled) {
+        if (enabled && !isArea) {
             out.write(s_end_a_tag);
         }
         else if (wroteSpan) {
             out.print("</span>");
+        }
+    }
+
+    private void appendAttributes(Device out, Set alreadyWritten, 
+                                  AttributeSet attributes) 
+        throws IOException
+    {
+        if (attributes == null) return;
+        Iterator it = attributes.getAttributeNames();
+        while (it.hasNext()) {
+            String attributeName= (String)it.next();
+            if (alreadyWritten.contains(attributeName.toLowerCase())) {
+                continue;
+            }
+            out.print( attributeName );
+            out.write( s_equals_quot );
+            out.print( attributes.getAttribute(attributeName) );
+            out.write( s_quote_space );
+            alreadyWritten.add(attributeName);
         }
     }
 }

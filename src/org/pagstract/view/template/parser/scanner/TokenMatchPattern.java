@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A compiled token pattern.
+ * A compiled token pattern. Once compiled, this pattern can be used
+ * in parallel by multiple threads in different StreamTokenMatchers.
  */
 public final class TokenMatchPattern {
     final static short INIT_STATE  =  0;
