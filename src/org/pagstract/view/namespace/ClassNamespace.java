@@ -15,7 +15,7 @@ package org.pagstract.view.namespace;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+//import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -142,7 +142,7 @@ public class ClassNamespace implements Namespace {
     protected static Map getGettersFor(Class c) {
         Map getters = null;
         if (!_getterCache.containsKey(c)) {
-            getters = new LinkedHashMap();
+            getters = new /*Linked*/HashMap();
             
             Method methods[] = c.getMethods();
             for( int i=0; i < methods.length; ++i) {
