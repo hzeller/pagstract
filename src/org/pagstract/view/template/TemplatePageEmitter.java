@@ -212,7 +212,7 @@ public class TemplatePageEmitter implements Visitor {
                    : -1);
         for (int index=start; nsIt.hasNext() && (max < 0 || index < max); ++index) {
             Namespace ns = (Namespace) nsIt.next();
-            
+
             try {
                 _nameResolver.pushNamespace(ns);
                 _nameResolver.pushIteratorIndex(index);

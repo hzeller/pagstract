@@ -8,6 +8,14 @@ import org.pagstract.view.template.parser.ast.*;
 import org.pagstract.view.template.parser.ast.list.*;
 
 parser code {:
+
+    public void report_fatal_error(String msg, Object sym)       
+      throws Exception {
+        TemplateScanner scanner = (TemplateScanner) getScanner();
+        throw new Exception(msg + "; latest tokens seen \n"
+                            + scanner.getTokenBacktrace());
+    }
+
     /*
      * test main
      */

@@ -15,6 +15,8 @@ package org.pagstract.view.template.parser.scanner;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -161,6 +163,17 @@ public class TemplateScanner implements Scanner {
     private final int _nestedTag[];
 
     /**
+     * maximum number of latest symbols seen.
+     */
+    private final static int MAX_BACKTRACE = 5;
+
+    /**
+     * a list of the last n tags occured
+     */
+    private final LinkedList _lastSymbols;
+    private final LinkedList _openSymbols;
+
+    /**
      * Calling next_token() usually generates two tokens: the
      * actual next token based on a tag and the content before
      * it as byte-array.
@@ -200,6 +213,9 @@ public class TemplateScanner implements Scanner {
         _recordingStream.resetRecording();
         _resourceName = resourceName;
         _nextSymbol = null;
+        _lastSymbols = new LinkedList();
+        _openSymbols = new LinkedList();
+
         /*
         if (TOKENS.length % 2 != 0) { // assert would be cool here.
             throw new IllegalArgumentException("PAGSTRACT DEVELOPER: there must be an even number of tokens..");
@@ -234,6 +250,39 @@ public class TemplateScanner implements Scanner {
                          + error);
     }
     
+    private void pushOpenSymbol(String name, FilePosition pos) {
+        _openSymbols.addFirst(pos + " " + name);
+    }
+
+    private void popOpenSymbol() {
+        _openSymbols.removeFirst();
+    }
+
+    private void traceSymbol(String name, FilePosition pos) {
+        _lastSymbols.addFirst(pos + " " + name);
+        if (_lastSymbols.size() > MAX_BACKTRACE) {
+            _lastSymbols.removeLast();
+        }
+    }
+
+    public String getTokenBacktrace() {
+        StringBuffer buf = new StringBuffer();
+        Iterator it = _lastSymbols.iterator();
+        while (it.hasNext()) {
+            buf.append(it.next()).append("\n");
+        }
+        
+        it = _openSymbols.iterator();
+        if (it.hasNext()) {
+            buf.append("-- unclosed tags at this point:\n");
+        }
+        while (it.hasNext()) {
+            buf.append(it.next()).append("\n");
+        }
+
+        return buf.toString();
+    }
+
     /**
      * Scanner implementation - return the next token.
      */
@@ -276,6 +325,8 @@ public class TemplateScanner implements Scanner {
             if (tokenNum < 0) {
                 recordedTagBeginPos = _recordingStream.getCurrentPosition()+1;
                 _nextSymbol = new Symbol( sym.EOF );
+                traceSymbol("end-of-file", new FilePosition(_resourceName,
+                                                            _positionStream.getStreamPosition()));
                 break;
             }
             
@@ -295,11 +346,12 @@ public class TemplateScanner implements Scanner {
                 byte[] range = _recordingStream
                     .getBuffer(recordedTagBeginPos+1,
                                _recordingStream.getCurrentPosition()-1);
-                final String resourceName = new String(range);
+                final String resolveResourceName = new String(range);
                 FilePosition pos = new FilePosition(_resourceName,tagStartPos);
-                SimpleTemplateToken tok = new SimpleTemplateToken(pos,
-                                                                  resourceName);
+                SimpleTemplateToken tok = 
+                    new SimpleTemplateToken(pos, resolveResourceName);
                 _nextSymbol = new Symbol(sym.ResourceResolver, tok);
+                traceSymbol("resource://", pos);
             }
             else if (token.isStartToken() && token.isDollarExpansion()) {
                 tokenNum = _tokenMatcher.nextToken();
@@ -320,12 +372,12 @@ public class TemplateScanner implements Scanner {
                         .getBuffer(recordedTagBeginPos+1,
                                    _recordingStream.getCurrentPosition()-1);
                     attributeMap.put("pma:name", new String(range));
+                    FilePosition pos = new FilePosition(_resourceName,
+                                                        tagStartPos);
                     TemplateToken templateToken;
-                    templateToken = 
-                        new TemplateToken(new FilePosition(_resourceName,
-                                                           tagStartPos),
-                                          attributeMap);
+                    templateToken =  new TemplateToken(pos, attributeMap);
                     _nextSymbol = new Symbol( sym.ValueSimple,templateToken );
+                    traceSymbol(token.getKeyword(), pos);
                 }
             }
             else {
@@ -359,14 +411,16 @@ public class TemplateScanner implements Scanner {
                                   + magicAttribute
                                   + " attribute");
                         }
-                        templateToken = 
-                            new TemplateToken(new FilePosition(_resourceName,
-                                                               tagStartPos),
-                                              attributeMap);
+                        FilePosition pos = new FilePosition(_resourceName,
+                                                            tagStartPos);
+                        templateToken = new TemplateToken(pos, attributeMap);
                         _nextSymbol = new Symbol( symbol, templateToken );
+                        traceSymbol(token.getKeyword(), pos);
+
                         if (!closeTag) { 
                             // remember, that we delivered the start tag..
                             _nestedTag[ tokenNum / 2 ]++;
+                            pushOpenSymbol(token.getKeyword(), pos);
                         }
                     }
                     else {
@@ -383,7 +437,11 @@ public class TemplateScanner implements Scanner {
                     int startCount = _nestedTag[tokenNum / 2];
                     if (startCount > 0) {
                         _nextSymbol = new Symbol( token.getSymbol() );
+                        traceSymbol(token.getKeyword(),
+                                    new FilePosition(_resourceName,
+                                                     tagStartPos));
                         _nestedTag[tokenNum / 2]--;
+                        popOpenSymbol();
                     }
                     if (token.isPmaSpecial() && startCount == 0) {
                         error(tagStartPos, "closing special tag '"
