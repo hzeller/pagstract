@@ -22,7 +22,11 @@ public final class MessageNode implements TemplateNode {
 
     public MessageNode(SimpleTemplateToken token) {
         _pos = token.getFilePosition();
-        _resource = token.getValue().substring(REMOVE_FIRST);
+        String resource = token.getValue().substring(REMOVE_FIRST);
+        if (resource.endsWith("/")) {
+            resource = resource.substring(resource.length()-2);
+        }
+        _resource = resource;
     }
 
     public String getResourceValue() {

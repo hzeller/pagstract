@@ -23,7 +23,7 @@ public final class ResourceNode implements TemplateNode {
 
     public ResourceNode(SimpleTemplateToken token) {
         _pos = token.getFilePosition();
-        _resource = token.getValue().substring(REMOVE_FIRST);
+        _resource = token.getValue().substring(REMOVE_FIRST - 1);
     }
 
     public String getResourceValue() {

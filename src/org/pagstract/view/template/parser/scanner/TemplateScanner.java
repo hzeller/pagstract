@@ -119,7 +119,7 @@ public class TemplateScanner implements Scanner {
 
         // that single token must be the last one..
         (new BasicToken("resource://",sym.ResourceResolver)).setResourceExp(),
-        (new BasicToken("msg://",sym.MessageResolver)).setResourceExp()
+        (new BasicToken("msg://",sym.MessageResolver)).setResourceExp().setEndsWithSlash()
     };
 
     private final static TokenMatchPattern MATCH_PATTERN;
@@ -351,14 +351,15 @@ public class TemplateScanner implements Scanner {
                     _in.mark(1);
                     c = _in.read();
                 }
-                while (c >= 0 && c != '"' && c != '/'
+                while (c >= 0 && c != '"' && c != '\''
+                       && (!token.endsWithSlash() || c != '/')
                        && !Character.isWhitespace((char)c)
                        && c != '<' && c != '&');
 
                 byte[] range = _recordingStream
                     .getBuffer(recordedTagBeginPos+1,
                                _recordingStream.getCurrentPosition()- ((c != -1) ? 1 : 0));
-                if (c != '/') {
+                if (!token.endsWithSlash() || c != '/') {
                     _in.reset();
                 }
 
@@ -525,7 +526,8 @@ public class TemplateScanner implements Scanner {
         private final boolean _dollarExp;
         private boolean _isStartSymbol = false;
         private boolean _resourceExp = false;
-        
+        private boolean _endsWithSlash = false;
+
         BasicToken(String keyword) {
             this(keyword, -1, false);
         }
@@ -570,6 +572,12 @@ public class TemplateScanner implements Scanner {
             return this; 
         }
 
+        /* for messages */
+        public BasicToken setEndsWithSlash() {
+            _endsWithSlash = true;
+            return this;
+        }
+
         public boolean isStartToken()   { return _isStartSymbol; }
         public String getKeyword()      { return _keyword; }
         public int getSymbol()       { return _symbol; }
@@ -583,6 +591,7 @@ public class TemplateScanner implements Scanner {
 
         public boolean isDollarExpansion() { return _dollarExp; }
         public boolean isResourceExpansion() { return _resourceExp; }
+        public boolean endsWithSlash() { return _endsWithSlash; }
     }
 }
 
