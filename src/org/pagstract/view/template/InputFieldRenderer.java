@@ -150,8 +150,17 @@ public class InputFieldRenderer implements ComponentRenderer {
 
         if (!isTextarea) {
             if (checkableInput) {
-                String templateValue = origTag.getAttribute("value");
-                if (value.equals(templateValue)) {
+                // schauen, ob der Wert dasselbe ist wie im Attribut.
+                // ob das Attribut nun aus dem attribut-Set kommt oder
+                // dem Template ist egal. Attribute-Set hat vorrang.
+                final String attribValue = ((attributeSet != null)
+                                            ? attributeSet.getAttribute("value")
+                                            : null);
+                final String selectionRelevant = (attribValue != null) 
+                    ? attribValue
+                    : origTag.getAttribute("value");
+                
+                if (value.equals(selectionRelevant)) {
                     out.write( s_checked );
                 }
             } 

@@ -64,6 +64,11 @@ public class TextFieldModel
         }
         _attributes.put(name, value);
     }
+    
+    public void removeAttribute(String name) {
+        if (_attributes == null) return;
+        _attributes.remove(name);
+    }
 
     //-- interface ComponentModel 
     public boolean isEnabled() { 
