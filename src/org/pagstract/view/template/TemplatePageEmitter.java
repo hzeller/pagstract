@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.pagstract.io.Device;
 import org.pagstract.model.SingleValueModel;
+import org.pagstract.model.ActionModel;
 import org.pagstract.model.ComponentModel;
 import org.pagstract.view.namespace.NameResolver;
 import org.pagstract.view.namespace.Namespace;
@@ -361,7 +362,8 @@ public class TemplatePageEmitter implements Visitor {
         printNamespace(ctxt.getNamespace(), ctxt.getName());
         _out.print("</div>");
     }
-    
+
+    /** Blödes hack debug output gelöt */
     private void printNamespace(Namespace ns, String name)
         throws IOException 
     {
@@ -373,7 +375,7 @@ public class TemplatePageEmitter implements Visitor {
         Namespace subNs = null;
         if (ns.isIteratableObject(name)) {
             Iterator/*<Namespace>*/ nsit = ns.getNamespaceIterator(name);
-            if (nsit.hasNext()) {
+            if (nsit != null && nsit.hasNext()) {
                 subNs = (Namespace) nsit.next();
             }
             else {
@@ -397,6 +399,22 @@ public class TemplatePageEmitter implements Visitor {
                 }
                 else {
                     _out.print(currentName);
+                    try {
+                        Object o = subNs.getNamedObject(currentName);
+                        if (o instanceof ActionModel) {
+                            String url = AnchorRenderer.buildActionUrl((ActionModel) o, _urlProvider);
+                            _out.print(" = <em><a href=\"" + url + "\">" + url + "</a></em>");
+                        }
+                        else if (o != null) {
+                            _out.print(" = <em>"+o.toString()+"</em>");
+                        }
+                        else {
+                            _out.print(" = NULL");
+                        }
+                    }
+                    catch (Exception e) {
+                        // egal.
+                    }
                 }
                 _out.print("</td></tr>");
             }

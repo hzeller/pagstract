@@ -47,6 +47,47 @@ public class AnchorRenderer implements ComponentRenderer {
         _urlProvider = urlProvider;
     }
     
+    static String buildActionUrl(ActionModel action, 
+                                 ActionUrlProvider urlProvider) 
+    {
+        StringBuffer result = new StringBuffer();
+        Iterator it= action.getParameterNames();
+        String url = action.getUrl();
+        if (urlProvider != null) {
+            url = urlProvider.resolveUrl(url);
+        }
+        boolean requireQuestMark = true;
+        if (url != null) {
+            result.append(url);
+            requireQuestMark = (url.indexOf('?') < 0);
+        }
+        if( it.hasNext()) {
+            result.append(requireQuestMark ? "?" : "&amp;");
+        }
+        while( it.hasNext()) {
+            final String pname= (String) it.next();
+            if (pname == null) {
+                _log.error("<null> parameter name in action " + action);
+                continue;
+            }
+            final String pvalue = action.getParameter(pname);
+            result.append(pname).append("=");
+            if (pvalue != null) {
+                result.append( URLEncoder.encode(pvalue));
+            }
+
+            if (it.hasNext()) {
+                result.append( "&amp;"  );
+            }
+        }
+
+        if (action.getAnchor() != null) {
+            result.append("#").append(action.getAnchor());
+        }
+
+        return result.toString();
+    }
+
     public void render(Visitor renderVisitor,
                        TemplateNode n, 
                        Object value, Device out) 
@@ -78,43 +119,7 @@ public class AnchorRenderer implements ComponentRenderer {
          * from it.
          */
         if (value instanceof ActionModel) {
-            ActionModel action = (ActionModel) value;
-            StringBuffer result = new StringBuffer();
-            Iterator it= action.getParameterNames();
-            String url = action.getUrl();
-            if (_urlProvider != null) {
-                url = _urlProvider.resolveUrl(url);
-            }
-            boolean requireQuestMark = true;
-            if (url != null) {
-                result.append(url);
-                requireQuestMark = (url.indexOf('?') < 0);
-            }
-            if( it.hasNext()) {
-                result.append(requireQuestMark ? "?" : "&amp;");
-            }
-            while( it.hasNext()) {
-                final String pname= (String) it.next();
-                if (pname == null) {
-                    _log.error("<null> parameter name in action " + action);
-                    continue;
-                }
-                final String pvalue = action.getParameter(pname);
-                result.append(pname).append("=");
-                if (pvalue != null) {
-                    result.append( URLEncoder.encode(pvalue));
-                }
-
-                if (it.hasNext()) {
-                    result.append( "&amp;"  );
-                }
-            }
-
-            if (action.getAnchor() != null) {
-                result.append("#").append(action.getAnchor());
-            }
-
-            actionUrl = result.toString();
+            actionUrl = buildActionUrl((ActionModel) value, _urlProvider);
         }
         
         else if (value instanceof SingleValueModel) {
