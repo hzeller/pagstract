@@ -40,18 +40,29 @@ public class PagstractTest extends TestCase {
         assertEquals("xyfooz", exec.render());
     }
 
-    public void test_resource() throws Exception {
+    public void test_message() throws Exception {
         TemplateExecutor exec = new TemplateExecutor("xmsg://foo ");
-        assertEquals("xRESOURCE ", exec.render());
+        assertEquals("xMESSAGE ", exec.render());
 
         exec = new TemplateExecutor("xmsg://foo"); // EOF-handling
-        assertEquals("xRESOURCE", exec.render());
+        assertEquals("xMESSAGE", exec.render());
 
         exec = new TemplateExecutor("xmsg://foo/");
-        assertEquals("xRESOURCE", exec.render());
+        assertEquals("xMESSAGE", exec.render());
 
         exec = new TemplateExecutor("xmsg://foo/ab");
-        assertEquals("xRESOURCEab", exec.render());
+        assertEquals("xMESSAGEab", exec.render());
+
+        exec = new TemplateExecutor("xmsg://foo//");
+        assertEquals("xMESSAGE/", exec.render());
+    }
+
+    public void test_resource() throws Exception {
+        TemplateExecutor exec = new TemplateExecutor("<img src='resource://foo/bar/baz'/>");
+        assertEquals("<img src='/foo/bar/baz'/>", exec.render());
+
+        exec = new TemplateExecutor("<img src='resource://foo/bar/baz/'/>");
+        assertEquals("<img src='/foo/bar/baz/'/>", exec.render());
     }
 
     private void listTemplateTest(String listTemplate, String expect) throws Exception {
@@ -101,20 +112,42 @@ public class PagstractTest extends TestCase {
 
         action.setEnabled(true);
         action.setVisible(true);
+
+        /* with slash */
         exec = new TemplateExecutor("<a pma:name='actionValue' title='msg://foo/'>foo</a>");
         exec.getModel().setActionValue(action);
-        assertEquals("<a href=\"" + url + "\" title=\"RESOURCE\">foo</a>", exec.render());
+        assertEquals("<a href=\"" + url + "\" title=\"MESSAGE\">foo</a>", exec.render());
+
+        /* without slash */
+        exec = new TemplateExecutor("<a pma:name='actionValue' title='msg://foo'>foo</a>");
+        exec.getModel().setActionValue(action);
+        assertEquals("<a href=\"" + url + "\" title=\"MESSAGE\">foo</a>", exec.render());
+    }
+
+    /**
+     * a Resource-Resolver, that resolves the only resource 'foo' to
+     * 'MESSAGE'
+     */
+    private static final class DummyMessageResolver 
+        implements ResourceResolver {
+        public String resolveResource(String resourceName) throws Exception {
+            if (!"foo".equals(resourceName)) {
+                Thread.dumpStack();
+                throw new Exception("invalid message; should be named 'foo', but got '"
+                                     + resourceName + "'");
+            }
+            return "MESSAGE";
+        }
     }
 
     private static final class DummyResourceResolver 
         implements ResourceResolver {
         public String resolveResource(String resourceName) throws Exception {
-            if (!"foo".equals(resourceName)) {
+            if (!resourceName.startsWith("/")) {
                 Thread.dumpStack();
-                throw new Exception("invalid resource; should be named 'foo', but got '"
-                                     + resourceName + "'");
+                throw new Exception("invalid resource; got '" + resourceName + "' (does not start with '/')");
             }
-            return "RESOURCE";
+            return resourceName;
         }
     }
 
@@ -129,15 +162,16 @@ public class PagstractTest extends TestCase {
 
             _sbDev = new StringBufferDevice();
             FileTemplateResolver resolver = new FileTemplateResolver();
-            DummyResourceResolver resourceResolver = new DummyResourceResolver();
-            
+            ResourceResolver resourceResolver = new DummyResourceResolver();
+            ResourceResolver messageResolver = new DummyMessageResolver();
+
             PageFactory factory 
                 = new TemplatePageFactory(_sbDev, 
                                           new PrefixResourceResolver("/tmp"),
                                           resolver,
                                           null, resourceResolver,
                                           new RendererResolver(),
-                                          resourceResolver);
+                                          messageResolver);
             
             _page = factory.createPageFor(TestPage.class);
         }
