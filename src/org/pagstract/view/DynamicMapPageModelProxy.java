@@ -78,6 +78,13 @@ public final class DynamicMapPageModelProxy implements InvocationHandler {
             _storageMap.put(name, args[0]);
             //System.out.println( "proxy("+name+"): "+args[0]);
         }
+
+        // convenient getter..
+        if (name.startsWith("get")) {
+            name = decapitalize(name.substring(3));
+            return _storageMap.get(name);
+        }
+
         return null;
     }
 
