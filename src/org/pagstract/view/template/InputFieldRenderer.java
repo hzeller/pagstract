@@ -38,7 +38,7 @@ public class InputFieldRenderer implements ComponentRenderer {
     private static final byte[] s_type_eq       = " type=\"".getBytes();
     private static final byte[] s_quot_space    = "\" ".getBytes();
     private static final byte[] s_equals_quot   = "=\"".getBytes();
-    private static final byte[] s_close_tag     = "/>".getBytes();
+    private static final byte[] s_close_tag     = ">".getBytes();
     private static final byte[] s_simple_close_tag = ">".getBytes();
     private static final byte[] s_checked       = " checked=\"checked\" ".getBytes();
     private static final byte[] s_readonly   = " readonly=\"readonly\" ".getBytes();
@@ -159,7 +159,12 @@ public class InputFieldRenderer implements ComponentRenderer {
         }
 
         final Set alreadyWritten = new HashSet();
-        if (checkableInput) alreadyWritten.add("checked");
+        if (checkableInput) {
+            alreadyWritten.add("checked");
+        }
+        else {
+            alreadyWritten.add("value");
+        }
         alreadyWritten.add("pma:name");
         alreadyWritten.add("name");
         alreadyWritten.add("type");

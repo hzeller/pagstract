@@ -124,9 +124,8 @@ public class MapNamespace implements Namespace {
     }
 
     private boolean isNamespaceObject(Object o) {
-        return ! (o instanceof String
-                  || o instanceof DataModel
-                  || o instanceof ComponentModel);
+        if (o == null) return false;
+        return ClassNamespace.isTypeANamespace(o.getClass());
     }
 
     public Set/*<String>*/ availableNames() {

@@ -2,7 +2,7 @@
 <project name="Pagstract - web application view model"
          default="compile" basedir=".">
      <!-- properties -->
-     <property name="version"              value="0.40" />
+     <property name="version"              value="0.41" />
      <property name="src"                  value="src" />
      <property name="bin"                  value="bin" />
      <property name="lib"                  value="lib" />

@@ -133,10 +133,10 @@ public class PageModelClassNamespace implements Namespace {
                                                + ": does not implement PageModel");
         }
 
-        Method[] methods = iface.getMethods();
+        final Method[] methods = iface.getMethods();
         for (int i=0; i < methods.length; ++i) {
-            Method m = methods[i];
-            String name = m.getName();
+            final Method m = methods[i];
+            final String name = m.getName();
             if (!name.startsWith("set"))
                 continue;
 
@@ -152,6 +152,10 @@ public class PageModelClassNamespace implements Namespace {
             }
             
             String propName = decapitalize(name.substring(3));
+            if (result.containsKey(propName)) {
+                throw new IllegalArgumentException(name
+                                                   + ": mor than one setter with this name");
+            }
             result.put(propName, params[0]);
         }
         return result;

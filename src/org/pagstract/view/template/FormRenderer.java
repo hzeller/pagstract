@@ -48,7 +48,7 @@ public class FormRenderer implements ComponentRenderer {
     private static final byte[] s_type_hidden = "type=\"hidden\" ".getBytes();
     private static final byte[] s_name_equals_quot = "name=\"".getBytes();
     private static final byte[] s_quot_value_equals_quot = "\" value=\"".getBytes();
-    private static final byte[] s_quot_end_tag = "\" />".getBytes();
+    private static final byte[] s_quot_end_tag = "\" >".getBytes();
 
     private final ActionUrlProvider _urlProvider;
     
