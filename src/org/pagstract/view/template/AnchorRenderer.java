@@ -50,10 +50,12 @@ public class AnchorRenderer implements ComponentRenderer {
     private static final byte[] s_slash      = "/".getBytes();
     private static final byte[] s_equals_quot   = "=\"".getBytes();
 
-    private ActionUrlProvider _urlProvider;
+    private final ActionUrlProvider _urlProvider;
+    private final ResourceResolver _messageResolver;
 
-    public AnchorRenderer(ActionUrlProvider urlProvider) {
+    public AnchorRenderer(ActionUrlProvider urlProvider, ResourceResolver msgResolver) {
         _urlProvider = urlProvider;
+        _messageResolver = msgResolver;
     }
     
     static String buildActionUrl(ActionModel action, 
@@ -148,7 +150,8 @@ public class AnchorRenderer implements ComponentRenderer {
             out.write( isArea ? s_area_href : s_a_href );
             out.print( actionUrl );
             out.print("\"");
-
+            
+            // FIXME: copy-paste
             Iterator origAttrIt = origTag.getAttributeNames();
             while( origAttrIt.hasNext()) {
                 final String attributeName= (String) origAttrIt.next();
@@ -175,7 +178,7 @@ public class AnchorRenderer implements ComponentRenderer {
                 out.print( " " );
                 out.print( tagAttribute );
                 out.print( "=\"" );
-                out.print( origTag.getAttribute(attributeName) );
+                out.print( resolveAttribute(origTag.getAttribute(attributeName)) );
                 out.print( "\"" );
                 alreadyWritten.add(tagAttribute);
             }
@@ -218,7 +221,7 @@ public class AnchorRenderer implements ComponentRenderer {
                 out.print(" ");
                 out.print( tagAttribute );
                 out.print( "=\"" );
-                out.print( origTag.getAttribute(attributeName) );
+                out.print( resolveAttribute(origTag.getAttribute(attributeName)) );
                 out.print( "\"" );
             }
             if (wroteSpan) {
@@ -266,6 +269,25 @@ public class AnchorRenderer implements ComponentRenderer {
             out.write( s_quote_space );
             alreadyWritten.add(attributeName);
         }
+    }
+    
+    /**
+     * 
+     */
+    private String resolveAttribute(String attr) {
+        if (_messageResolver != null && attr.startsWith("msg://")) {
+            try {
+                attr = attr.substring(6);
+                if (attr.endsWith("/")) {
+                    attr = attr.substring(0, attr.length()-1);
+                }
+                return _messageResolver.resolveResource(attr);
+            }
+            catch (Exception e) {
+                return "could-not-resolve-resource " + attr;
+            }
+        }
+        return attr;
     }
 }
 

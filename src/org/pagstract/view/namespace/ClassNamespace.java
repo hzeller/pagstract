@@ -158,10 +158,20 @@ public class ClassNamespace implements Namespace {
                 String name = m.getName();
                 String getterName;
                 
+                /*
+                 * getters are only getters if the return
+                 * something (!void) and do not take 
+                 * any paramter
+                 */
+
                 if (m.getReturnType() == void.class) {
                     continue;
                 }
                 
+                if (m.getParameterTypes().length != 0) {
+                    continue;
+                }
+
                 if ((m.getReturnType() == boolean.class
                      || m.getReturnType() == Boolean.class)
                     && name.length() > 2 

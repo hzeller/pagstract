@@ -337,7 +337,7 @@ public class TemplatePageEmitter implements Visitor {
     }
 
     public void visit(AnchorNode node) throws Exception {
-        ComponentRenderer renderer = new AnchorRenderer(_urlProvider);
+        ComponentRenderer renderer = new AnchorRenderer(_urlProvider, _messageBundle);
         Object value = resolveNamedObject(node);
         renderer.render(this, node, value, _out);
     }

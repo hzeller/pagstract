@@ -10,7 +10,9 @@
      <property name="javadoc.home"         value="${build}/javadoc"/>
      <property name="build.src"            value="${build}/src" />
      <property name="build.test"           value="${build}/test" />
+     <property name="build.junit"          value="${build}/junit" />
      <property name="build.classes"        value="${build}/classes" />
+     <property name="junit.log.dir"        value="/tmp"/>
      <property name="pkgbase"              value="pagstract-${version}" />
 
      <property name="tgram-path"       value="org/pagstract/view/template" />
@@ -24,6 +26,7 @@
 
      <!-- libs needed for compilation -->
      <fileset dir="${extern.libdir}" defaultexcludes="yes" id="build.libs"> 
+          <include name="junit-3.8.1.jar"/>
           <include name="jsdk-2.3.jar" /> <!-- ServletDevice -->
 	  <include name="javacup-runtime-0.10j.jar"/>
           <include name="commons-logging-api-1.0.1.jar"/>
@@ -40,6 +43,7 @@
         <mkdir dir="${tgram-generate}" />
         <mkdir dir="${build.classes}" />
         <mkdir dir="${build.test}" />
+        <mkdir dir="${build.junit}" />
      </target>
 
      <!-- the following ten (10) lines would be two (2) readable lines 
@@ -137,6 +141,34 @@
                 <fileset refid="build.libs"/>
             </classpath>
         </java>
+    </target>
+
+    <target name="junit-compile" depends="compile"
+            description="compile test program and create page model jar">
+        <javac srcdir="test-src" destdir="${build.junit}"
+	       deprecation="yes" debug="true">
+            <classpath>
+                <fileset refid="build.libs"/>
+                <pathelement location="${build.classes}"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="junit-test" depends="junit-compile" 
+	    description="executes junit tests">
+        <junit fork="yes" haltonfailure="no" printsummary="on" showoutput="false">
+            <classpath>
+                <fileset refid="build.libs"/>
+                <pathelement location="${build.classes}"/>
+                <pathelement location="${build.junit}"/>
+            </classpath>
+            <formatter type="plain" usefile="true" />
+            <batchtest todir="${junit.log.dir}">
+	      <fileset dir="${build.junit}" defaultexcludes="yes">
+		<include name="**/*Test.class" />
+	      </fileset>
+	    </batchtest>
+        </junit>
     </target>
 
     <target name="run-ide" depends="test-compile"

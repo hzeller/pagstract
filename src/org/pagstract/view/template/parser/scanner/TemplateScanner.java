@@ -351,14 +351,16 @@ public class TemplateScanner implements Scanner {
                     _in.mark(1);
                     c = _in.read();
                 }
-                while (c >= 0 && c != '"' 
+                while (c >= 0 && c != '"' && c != '/'
                        && !Character.isWhitespace((char)c)
                        && c != '<' && c != '&');
 
                 byte[] range = _recordingStream
                     .getBuffer(recordedTagBeginPos+1,
-                               _recordingStream.getCurrentPosition()-1);
-                _in.reset();
+                               _recordingStream.getCurrentPosition()- ((c != -1) ? 1 : 0));
+                if (c != '/') {
+                    _in.reset();
+                }
 
                 final String resolveResourceName = new String(range);
                 FilePosition pos = new FilePosition(_resourceName,tagStartPos);

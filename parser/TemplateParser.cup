@@ -87,12 +87,14 @@ non terminal DebugNode         DebugTag;
 non terminal ValueNode         ValueTag;
 non terminal TileNode          TileTag;
 non terminal NodeSequence      Sequence;
+non terminal NodeSequence      OptionalSequence;
 non terminal ConstantNode      ConstantTag;
 non terminal SwitchNode        SwitchTag;
 non terminal ResourceNode      ResourceTag;
 non terminal MessageNode       MessageTag;
 non terminal Map               CaseList;
 non terminal TemplateNode      IgnoredSequence;
+non terminal byte[]            IgnoredBytes;
 non terminal ListContentContainer ListContentSequence;
 non terminal ListContent       ListContent;
 
@@ -103,8 +105,18 @@ Sequence ::=
         | SomeTag:t {: RESULT= new NodeSequence(t); :} 
         ;
 
+OptionalSequence ::=
+         Sequence:s   {: RESULT = s; :}
+       | /* epsion */ {: RESULT = null; :}
+       ;
+
 IgnoredSequence ::=
           Sequence
+        | /* epsilon */
+        ;
+
+IgnoredBytes ::=
+          Bytes
         | /* epsilon */
         ;
 
@@ -150,26 +162,26 @@ FormTag ::=
         ;
 
 ListTag ::= 
-          ListStart:l Sequence:s ListEnd {: RESULT=new IteratorNode( l, s); :}
-        | ListStart:l ListContentSequence:lc Bytes/*ign*/ ListEnd {: RESULT = new IteratorNode( l, lc ); :}
+          ListStart:l OptionalSequence:s ListEnd {: RESULT=new IteratorNode( l, s); :}
+        | ListStart:l ListContentSequence:lc IgnoredBytes ListEnd {: RESULT = new IteratorNode( l, lc ); :}
         | ListSimple:l  {: RESULT= new IteratorNode( l ); :}
         ;
 
 ListContentSequence ::= 
-          ListContentSequence:s Bytes/*ign*/ ListContent:t {: s.addListContent(t); RESULT= s; :}
-        | Bytes/*ignore*/ ListContent:t {: RESULT= new ListContentContainer(t); :} 
+          ListContentSequence:s IgnoredBytes ListContent:t {: s.addListContent(t); RESULT= s; :}
+        | IgnoredBytes ListContent:t {: RESULT= new ListContentContainer(t); :} 
         ;
 
 ListContent ::=
-          ListHeaderStart Sequence:s ListHeaderEnd
+          ListHeaderStart OptionalSequence:s ListHeaderEnd
                {: RESULT=new ListHeaderContent(s); :}
-        | ListContentStart Sequence:s ListContentEnd
+        | ListContentStart OptionalSequence:s ListContentEnd
                {: RESULT=new ListContentContent(s); :}
-        | ListSeparatorStart Sequence:s ListSeparatorEnd
+        | ListSeparatorStart OptionalSequence:s ListSeparatorEnd
                {: RESULT=new ListSeparatorContent(s); :}
-        | ListFooterStart Sequence:s ListFooterEnd
+        | ListFooterStart OptionalSequence:s ListFooterEnd
                {: RESULT=new ListFooterContent(s); :}
-        | ListNoContentStart Sequence:s ListNoContentEnd
+        | ListNoContentStart OptionalSequence:s ListNoContentEnd
                {: RESULT=new ListEmptyContent(s); :}
         ;
          
@@ -191,9 +203,7 @@ SwitchTag ::=
         ;
 
 CaseList ::= 
-          CaseList:l ObjectStart:o Sequence:s ObjectEnd Bytes/* ignore bytes */
-                 {: l.put( o.getTagCaseValue(), s); RESULT= l; :}
-        | CaseList:l ObjectStart:o Sequence:s ObjectEnd 
+          CaseList:l ObjectStart:o Sequence:s ObjectEnd IgnoredBytes
                  {: l.put( o.getTagCaseValue(), s); RESULT= l; :}
         | /* epsilon */ {: RESULT= new HashMap(); :} 
         ;
@@ -235,6 +245,7 @@ TileTag ::=
 ConstantTag ::= 
           Bytes:b {: RESULT= new ConstantNode(b); :} 
         ;
+
 
 /* Emacs: 
  * Local variables:
