@@ -89,7 +89,14 @@ public class BeanNamespace extends ClassNamespace {
             // quick hack:
             List l = new ArrayList();
             for (int i=0; i < array.length; ++i) {
-                l.add(new BeanNamespace(array[i]));
+                final Object element = array[i];
+                if (element == null) {
+                    _log.error("null element at pos " + i 
+                               + " in iteratable context: " + name);
+                }
+                else {
+                    l.add(new BeanNamespace(element));
+                }
             }
             return l.iterator();
         }

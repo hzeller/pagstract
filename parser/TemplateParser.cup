@@ -43,6 +43,7 @@ terminal TemplateToken LinkStart, LinkEnd,
                   InputStart, InputEnd, InputSimple,
                   FormStart, FormEnd,                  
                   BeanStart, BeanEnd, 
+                  IfVisibleStart, IfVisibleEnd,
                   ValueStart, ValueEnd, ValueSimple,
                   SelectFieldStart, SelectFieldEnd, SelectFieldSimple,
                   ObjectStart, ObjectEnd,
@@ -66,6 +67,7 @@ non terminal AnchorNode        LinkTag;
 non terminal FormNode          FormTag;
 non terminal IteratorNode      ListTag;
 non terminal BeanNode          BeanTag;
+non terminal IfVisibleNode     IfVisibleTag;
 non terminal ValueNode         ValueTag;
 non terminal TileNode          TileTag;
 non terminal NodeSequence      Sequence;
@@ -89,16 +91,17 @@ IgnoredSequence ::=
         ;
 
 SomeTag ::= 
-          InputTag:t    {: RESULT= t; :}
+          InputTag:t     {: RESULT= t; :}
         | SelectFieldTag:t {: RESULT= t; :}
-        | LinkTag:t     {: RESULT= t; :}
-        | FormTag:t     {: RESULT= t; :}
-        | ListTag:t     {: RESULT= t; :}
-        | BeanTag:t     {: RESULT= t; :}
-        | SwitchTag:t   {: RESULT= t; :}
-        | ConstantTag:t {: RESULT= t; :}
-        | ValueTag:t    {: RESULT= t; :}
-        | TileTag:t     {: RESULT= t; :}
+        | LinkTag:t      {: RESULT= t; :}
+        | FormTag:t      {: RESULT= t; :}
+        | ListTag:t      {: RESULT= t; :}
+        | BeanTag:t      {: RESULT= t; :}
+        | IfVisibleTag:t {: RESULT= t; :}
+        | SwitchTag:t    {: RESULT= t; :}
+        | ConstantTag:t  {: RESULT= t; :}
+        | ValueTag:t     {: RESULT= t; :}
+        | TileTag:t      {: RESULT= t; :}
         ;
 
 InputTag ::= 
@@ -145,7 +148,11 @@ ListContent ::=
         ;
 
 BeanTag ::= 
-          BeanStart:l Sequence:s BeanEnd {: RESULT= new BeanNode( l.getModelName(), s, l); :}
+          BeanStart:tag Sequence:content BeanEnd {: RESULT= new BeanNode( tag, content); :}
+        ;
+
+IfVisibleTag ::= 
+          IfVisibleStart:tag Sequence:content IfVisibleEnd {: RESULT= new IfVisibleNode( tag, content); :}
         ;
 
 SwitchTag ::= 

@@ -23,6 +23,9 @@ import java.util.Set;
 import org.pagstract.model.ComponentModel;
 import org.pagstract.model.DataModel;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * A simple Namespace that is backed by a Map. In the JSP and template
  * based implementation, the root-namespace (i.e. the namespace directly
@@ -30,6 +33,8 @@ import org.pagstract.model.DataModel;
  * {@link org.pagstract.view.DynamicMapPageModelProxy}.
  */
 public class MapNamespace implements Namespace {
+    private static final Log _log = LogFactory.getLog(MapNamespace.class);
+
     private final Map _map;
 
     public MapNamespace(Map inputMap) {
@@ -58,7 +63,8 @@ public class MapNamespace implements Namespace {
         try {
             return new BeanNamespace(object);
         } catch (Exception e) {
-            throw new RuntimeException("Could not get subnamespace for: "+name,e);
+            throw new RuntimeException("Could not get subnamespace for: '"
+                                       + name + "'",e);
         }
         //return new BeanNamespace(object);
     }
@@ -79,7 +85,13 @@ public class MapNamespace implements Namespace {
             for (int i=0; i < array.length; ++i) {
                 Object val = array[i];
                 if (isNamespaceObject(val)) {
-                    l.add(new BeanNamespace(val));
+                    if (val == null) {
+                        _log.error("null element in iterator element '"
+                                   + name + "' at position " + i);
+                    }
+                    else {
+                        l.add(new BeanNamespace(val));
+                    }
                 }
                 else {
                     l.add(val);
