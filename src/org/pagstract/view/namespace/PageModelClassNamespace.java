@@ -14,8 +14,9 @@ package org.pagstract.view.namespace;
 
 import java.lang.reflect.Method;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+//import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -136,7 +137,7 @@ public class PageModelClassNamespace implements Namespace {
     private static Map determinePageModelNames(Class iface) 
         throws IllegalArgumentException 
     {
-        final Map result = new LinkedHashMap();
+        final Map result = new /*Linked*/HashMap();
         if (!iface.isInterface()) {
             throw new IllegalArgumentException(iface.getName()
                                                + ": not an interface");
