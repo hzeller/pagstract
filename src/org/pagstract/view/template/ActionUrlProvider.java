@@ -12,10 +12,12 @@
  */
 package org.pagstract.view.template;
 
+import org.pagstract.model.ActionModel;
+
 /**
  * Resolve the abstract URL given in the ActionModel to a 'real'
  * URL that is rendered into the Page.
  */
 public interface ActionUrlProvider {
-    String resolveUrl(String url);
+    String resolveUrl(ActionModel actionModel, String url);
 }

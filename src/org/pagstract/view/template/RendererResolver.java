@@ -36,9 +36,25 @@ public class RendererResolver {
         _renderMap.put(matchClass, renderer);
     }
 
+    /**
+     * returns if there is a registered renderer for elements of the
+     * given class.
+     */
+    public boolean hasRendererFor(Class renderClass) {
+        return (findMatchingRendererFor(renderClass) != null);
+    }
+
+    /**
+     * Returns the renderer for the given class or the default renderer.
+     */
     public ObjectRenderer findRendererFor(Class renderClass) {
+        final ObjectRenderer renderer = findMatchingRendererFor(renderClass);
+        return (renderer != null) ? renderer : _defaultRenderer;
+    }
+
+    private ObjectRenderer findMatchingRendererFor(Class renderClass) {
         if (renderClass == null) {
-            return _defaultRenderer;
+            return null;
         } 
         else {
             Object r = _renderMap.get(renderClass);
@@ -46,7 +62,7 @@ public class RendererResolver {
                 return (ObjectRenderer)r;
             } 
             else {
-                return findRendererFor(renderClass.getSuperclass());
+                return findMatchingRendererFor(renderClass.getSuperclass());
             }
         }
     }

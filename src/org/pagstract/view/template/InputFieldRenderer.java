@@ -20,6 +20,7 @@ import java.util.HashSet;
 import org.pagstract.io.Device;
 import org.pagstract.model.ComponentModel;
 import org.pagstract.model.AttributeSet;
+import org.pagstract.model.ActionModel;
 import org.pagstract.model.SingleValueModel;
 import org.pagstract.view.template.parser.ast.InputFieldNode;
 import org.pagstract.view.template.parser.ast.TemplateNode;
@@ -77,6 +78,18 @@ public class InputFieldRenderer implements ComponentRenderer {
             value = ((SingleValueModel) inputValue).getValue();
             if (value == null) {
                 value = "";
+            }
+        }
+        else if (inputValue instanceof ActionModel) {
+            final String origValue = origTag.getAttribute("value");
+            final String attribValue = ((attributeSet != null)
+                                        ? attributeSet.getAttribute("value")
+                                        : null);
+            if (attribValue != null) {
+                value = attribValue;
+            }
+            else {
+                value = (origValue != null) ? origValue : "1";
             }
         }
         else {

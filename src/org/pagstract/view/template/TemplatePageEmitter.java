@@ -21,6 +21,7 @@ import org.pagstract.io.Device;
 import org.pagstract.model.SingleValueModel;
 import org.pagstract.model.ActionModel;
 import org.pagstract.model.ComponentModel;
+import org.pagstract.view.ObjectRenderer;
 import org.pagstract.view.namespace.NameResolver;
 import org.pagstract.view.namespace.Namespace;
 import org.pagstract.view.namespace.NamingContext;
@@ -373,6 +374,7 @@ public class TemplatePageEmitter implements Visitor {
     {
         _out.print("<table style='border:1px solid;'>");
         _out.print("<tr><td colspan='2'>" + name);
+
         if (ns.isIteratableObject(name)) {
             _out.print(" ( pma:list )");
         }
@@ -389,28 +391,41 @@ public class TemplatePageEmitter implements Visitor {
         else if (ns.isNamespace(name)) {
             subNs = ns.getSubNamespace(name);
         }
-  
+        
         _out.print("</td></tr>");
 
         if (subNs != null) {
             Set names = subNs.availableNames();
             Iterator it = names.iterator();
             while (it.hasNext()) {
-                String currentName = (String) it.next();
+                final String currentName = (String) it.next();
                 _out.print("\n<tr><td>&nbsp;&nbsp;</td><td>");
-                if (subNs.isNamespace(currentName)) {
+                final Object obj = subNs.getNamedObject(currentName);
+                Class renderableClass = subNs.getNamedObjectType(currentName);
+                if (subNs.isNamespace(currentName) 
+                    && (!_rendererResolver.hasRendererFor(renderableClass))) {
                     printNamespace(subNs, currentName);
                 }
                 else {
                     _out.print(currentName);
                     try {
-                        Object o = subNs.getNamedObject(currentName);
-                        if (o instanceof ActionModel) {
-                            String url = AnchorRenderer.buildActionUrl((ActionModel) o, _urlProvider);
+                        if (obj instanceof ActionModel) {
+                            String url = AnchorRenderer.buildActionUrl((ActionModel) obj, _urlProvider);
                             _out.print(" = <em><a href=\"" + url + "\">" + url + "</a></em>");
                         }
-                        else if (o != null) {
-                            _out.print(" = <em>"+o.toString()+"</em>");
+                        else if (obj instanceof SingleValueModel) {
+                            _out.print(" = [single-value-model] <em>");
+                            _out.print(((SingleValueModel) obj).getValue());
+                            _out.print("</em>");
+                        }
+                        else if (obj != null) {
+                            _out.print(" = <em>");
+                            ObjectRenderer renderer = _rendererResolver.findRendererFor(renderableClass);
+                            _out.print(renderer.renderObject(currentName, null, obj));
+                            _out.print("</em>");
+                            if (renderer.getClass() != SimpleStringRenderer.class) {
+                                _out.print(" <font size='-1'>(" + renderer.getClass() + ")</font>");
+                            }
                         }
                         else {
                             _out.print(" = NULL");
