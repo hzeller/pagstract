@@ -46,8 +46,8 @@ import org.pagstract.view.template.parser.sym;
  * </pre>
  */
 public class TemplateScanner implements Scanner {
-    /** expand necessary to use pagstract in java script */
-    private final static boolean EXPAND_HTML_COMMENTS = true;
+    /** do not expand pagstract tags in pagstract comments */
+    private final static boolean EXPAND_PAGSTRACT_COMMENTS = false;
     private final static int MAX_TAGATTRIBUTE_AREA = 8192;
 
     private final static int START_COMMENT = 0;
@@ -55,7 +55,7 @@ public class TemplateScanner implements Scanner {
 
     private final static BasicToken TOKENS[] = {
         //-- comment tokens first (see constants above)
-        new BasicToken("<!--"),        new BasicToken("-->"),
+        new BasicToken("<%--"),        new BasicToken("--%>"),
         
         /* our tags. Note, that closing tags MUST follow their opening
          * counterparts (_nestedTag logic..). Opening tags MUST be
@@ -301,7 +301,7 @@ public class TemplateScanner implements Scanner {
             attributeMap.clear();
             int tokenNum;
             
-            if ( EXPAND_HTML_COMMENTS ) {
+            if ( EXPAND_PAGSTRACT_COMMENTS ) {
                 do {
                     tokenNum = _tokenMatcher.nextToken( 256 );
                 }
