@@ -72,8 +72,10 @@ public class TemplateScanner implements Scanner {
         new BasicToken("</pma:switch>",sym.SwitchEnd),
         new BasicToken("<pma:form ",   sym.FormStart, -1, "pma:name"),
         new BasicToken("</pma:form>",  sym.FormEnd),
+        /* this has to be tested first.
         new BasicToken("<form ",   sym.FormStart, -1, "pma:name"),
         new BasicToken("</form>",  sym.FormEnd),
+        */
         new BasicToken("<pma:tile ",  sym.TileStart,sym.TileSimple, null),
         new BasicToken("</pma:tile>",  sym.TileEnd),
         new BasicToken("<a ",          sym.LinkStart, -1, "pma:name"),
