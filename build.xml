@@ -20,7 +20,7 @@
      <property name="build.compiler"           value="modern"/>
      <property name="build.compiler.pedantic"  value="true"/>
      <property name="build.compiler.emacs" value="true" />
-     <property name="extern.libdir"            value="../lib/extern"/>
+     <property name="extern.libdir"            value="lib"/>
 
      <!-- libs needed for compilation -->
      <fileset dir="${extern.libdir}" defaultexcludes="yes" id="build.libs"> 

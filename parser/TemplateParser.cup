@@ -1,0 +1,198 @@
+package org.pagstract.view.template.parser;
+
+import java.io.*;
+import java.util.*;
+import java_cup.runtime.*;
+import org.pagstract.view.template.parser.scanner.*;
+import org.pagstract.view.template.parser.ast.*;
+import org.pagstract.view.template.parser.ast.list.*;
+
+parser code {:
+    /*
+     * test main
+     */
+    public static void main( String args []) {
+
+      boolean file_flag = args.length == 2 && args[0].equals("-f");
+      TemplateScanner scanner= null;
+      try {
+        if( file_flag) {
+            scanner= new TemplateScanner( new FileInputStream( args[1] ),
+                                          args[1]);
+        }
+        else {
+            scanner= new TemplateScanner( System.in );
+        }
+        TemplateParser parser = new TemplateParser( scanner);
+        Symbol            symbol= parser.parse();
+        Visitor printVisitor = new PrintVisitor();
+        NodeSequence      oe= (NodeSequence)symbol.value;
+        oe.accept(printVisitor);
+      } catch (Exception ioe) { System.err.println( ioe); ioe.printStackTrace(); }
+    }
+
+    public static void printx( String txt) {
+        System.out.println( txt);
+    }
+:}
+
+terminal byte[]        Bytes;
+
+terminal TemplateToken LinkStart, LinkEnd,
+                  SwitchStart, SwitchEnd,
+                  InputStart, InputEnd, InputSimple,
+                  FormStart, FormEnd,                  
+                  BeanStart, BeanEnd, 
+                  ValueStart, ValueEnd, ValueSimple,
+                  SelectFieldStart, SelectFieldEnd, SelectFieldSimple,
+                  ObjectStart, ObjectEnd,
+                  
+                  //-- list specific stuff
+                  ListStart, ListEnd, ListSimple,
+                  ListHeaderStart, ListHeaderEnd,
+                  ListContentStart, ListContentEnd,
+                  ListSeparatorStart, ListSeparatorEnd,
+                  ListFooterStart, ListFooterEnd,
+
+                  TileStart, TileEnd, TileSimple;
+
+//terminal TemplateToken    TextareaStart, TextareaEnd, TextareaSimple
+
+//--------    return value     terminal name -----
+non terminal TemplateNode      SomeTag;
+non terminal InputFieldNode    InputTag;
+non terminal SelectFieldNode   SelectFieldTag;
+non terminal AnchorNode        LinkTag;
+non terminal FormNode          FormTag;
+non terminal IteratorNode      ListTag;
+non terminal BeanNode          BeanTag;
+non terminal ValueNode         ValueTag;
+non terminal TileNode          TileTag;
+non terminal NodeSequence      Sequence;
+non terminal ConstantNode      ConstantTag;
+non terminal SwitchNode        SwitchTag;
+non terminal Map               CaseList;
+non terminal TemplateNode      IgnoredSequence;
+non terminal ListContentContainer ListContentSequence;
+non terminal ListContent       ListContent;
+
+start with  Sequence;
+
+Sequence ::= 
+          Sequence:s SomeTag:t {: s.addElement(t); RESULT= s; :}
+        | SomeTag:t {: RESULT= new NodeSequence(t); :} 
+        ;
+
+IgnoredSequence ::=
+          Sequence
+        | /* epsilon */
+        ;
+
+SomeTag ::= 
+          InputTag:t    {: RESULT= t; :}
+        | SelectFieldTag:t {: RESULT= t; :}
+        | LinkTag:t     {: RESULT= t; :}
+        | FormTag:t     {: RESULT= t; :}
+        | ListTag:t     {: RESULT= t; :}
+        | BeanTag:t     {: RESULT= t; :}
+        | SwitchTag:t   {: RESULT= t; :}
+        | ConstantTag:t {: RESULT= t; :}
+        | ValueTag:t    {: RESULT= t; :}
+        | TileTag:t     {: RESULT= t; :}
+        ;
+
+InputTag ::= 
+          InputStart:st InputEnd:e {: RESULT= new InputFieldNode( st.getModelName(), st); :}
+        | InputStart:st {: RESULT= new InputFieldNode( st.getModelName(), st);:}
+        | InputSimple:st {: RESULT= new InputFieldNode( st.getModelName(), st);:} 
+        ;
+
+SelectFieldTag ::=  
+          SelectFieldStart:l IgnoredSequence SelectFieldEnd 
+                  {: RESULT= new SelectFieldNode( l.getModelName(), l);:}
+        | SelectFieldSimple
+:l {: RESULT= new SelectFieldNode( l.getModelName(), l);:} 
+        ;
+
+LinkTag ::= 
+         LinkStart:l Sequence:s LinkEnd {: RESULT= new AnchorNode( l.getModelName(), s, l); :}
+        ;
+
+FormTag ::= 
+         FormStart:l Sequence:s FormEnd {:RESULT= new FormNode(l.getModelName(), s, l);:}
+        ;
+
+ListTag ::= 
+          ListStart:l Sequence:s ListEnd {: RESULT=new IteratorNode( l, s); :}
+        | ListStart:l ListContentSequence:lc Bytes/*ign*/ ListEnd {: RESULT = new IteratorNode( l, lc ); :}
+        | ListSimple:l  {: RESULT= new IteratorNode( l ); :}
+        ;
+
+ListContentSequence ::= 
+          ListContentSequence:s Bytes/*ign*/ ListContent:t {: s.addListContent(t); RESULT= s; :}
+        | Bytes/*ignore*/ ListContent:t {: RESULT= new ListContentContainer(t); :} 
+        ;
+
+ListContent ::=
+          ListHeaderStart Sequence:s ListHeaderEnd
+               {: RESULT=new ListHeaderContent(s); :}
+        | ListContentStart Sequence:s ListContentEnd
+               {: RESULT=new ListContentContent(s); :}
+        | ListSeparatorStart Sequence:s ListSeparatorEnd
+               {: RESULT=new ListSeparatorContent(s); :}
+        | ListFooterStart Sequence:s ListFooterEnd
+               {: RESULT=new ListFooterContent(s); :}
+        ;
+
+BeanTag ::= 
+          BeanStart:l Sequence:s BeanEnd {: RESULT= new BeanNode( l.getModelName(), s, l); :}
+        ;
+
+SwitchTag ::= 
+          SwitchStart:o Sequence:defContent CaseList:l SwitchEnd 
+                  {: RESULT= new SwitchNode( o.getModelName(), defContent, l, 
+                                             o ); :}
+        | SwitchStart:o CaseList:l SwitchEnd 
+                  {: RESULT= new SwitchNode( o.getModelName(), l,
+                                             o ); :}
+        ;
+
+CaseList ::= 
+          CaseList:l ObjectStart:o Sequence:s ObjectEnd Bytes/* ignore bytes */
+                 {: l.put( o.getTagCaseValue(), s); RESULT= l; :}
+        | CaseList:l ObjectStart:o Sequence:s ObjectEnd 
+                 {: l.put( o.getTagCaseValue(), s); RESULT= l; :}
+        | /* epsilon */ {: RESULT= new HashMap(); :} 
+        ;
+
+ValueTag ::= 
+          ValueStart:v IgnoredSequence ValueEnd:e 
+                       {: RESULT= new ValueNode( v.getModelName(), v.getRaw(),
+                                                 v.getFilePosition()); :}
+        | ValueSimple:v {: RESULT= new ValueNode( v.getModelName(), v.getRaw(),
+                                                  v.getFilePosition()); :} 
+        ;
+
+TileTag ::=
+          TileStart:v IgnoredSequence TileEnd:e
+                       {: RESULT= new TileNode( v.getModelName(),
+                                                v.getFilename(),
+                                                v.getFilePosition()); :}
+        | TileSimple:v {: RESULT= new TileNode( v.getModelName(),
+                                                v.getFilename(),
+                                                v.getFilePosition()); :}
+        ;
+
+ConstantTag ::= 
+          Bytes:b {: RESULT= new ConstantNode(b); :} 
+        ;
+
+/* Emacs: 
+ * Local variables:
+ * c-basic-offset: 4
+ * tab-width: 8
+ * indent-tabs-mode: nil
+ * compile-command: "ant -emacs -find build.xml compile"
+ * End:
+ * vi:set tabstop=8 shiftwidth=4 nowrap: 
+ */
