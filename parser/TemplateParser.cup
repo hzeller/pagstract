@@ -52,6 +52,7 @@ terminal TemplateToken LinkStart, LinkEnd,
                   FormStart, FormEnd,                  
                   BeanStart, BeanEnd,        
                   IfVisibleStart, IfVisibleEnd,
+                  DebugStart, DebugEnd, DebugSimple,
                   ValueStart, ValueEnd, ValueSimple,
                   SelectFieldStart, SelectFieldEnd, SelectFieldSimple,
                   ObjectStart, ObjectEnd,
@@ -79,6 +80,7 @@ non terminal FormNode          FormTag;
 non terminal IteratorNode      ListTag;
 non terminal BeanNode          BeanTag;
 non terminal IfVisibleNode     IfVisibleTag;
+non terminal DebugNode         DebugTag;
 non terminal ValueNode         ValueTag;
 non terminal TileNode          TileTag;
 non terminal NodeSequence      Sequence;
@@ -114,6 +116,7 @@ SomeTag ::=
         | ConstantTag:t  {: RESULT= t; :}
         | ResourceTag:t  {: RESULT= t; :}
         | ValueTag:t     {: RESULT= t; :}
+        | DebugTag:t     {: RESULT= t; :}
         | TileTag:t      {: RESULT= t; :}
         ;
 
@@ -193,6 +196,12 @@ ValueTag ::=
                                                  v.getFilePosition()); :}
         | ValueSimple:v {: RESULT= new ValueNode( v.getModelName(), v.getRaw(),
                                                   v.getFilePosition()); :} 
+        ;
+
+DebugTag ::=
+          DebugStart:v IgnoredSequence DebugEnd:e 
+                       {: RESULT= new DebugNode( v ); :}
+        | DebugSimple:v {: RESULT= new DebugNode( v ); :}
         ;
 
 ResourceTag ::= 

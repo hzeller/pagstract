@@ -28,6 +28,7 @@ import org.pagstract.view.template.parser.ast.TileNode;
 import org.pagstract.view.template.parser.ast.ValueNode;
 import org.pagstract.view.template.parser.ast.IfVisibleNode;
 import org.pagstract.view.template.parser.ast.ResourceNode;
+import org.pagstract.view.template.parser.ast.DebugNode;
 import org.pagstract.view.template.parser.ast.Visitor;
 
 /**
@@ -94,6 +95,10 @@ public class RecursiveDescendVisitor implements Visitor {
     }
 
     public void visit(ResourceNode node) {
+        // leaf node
+    }
+
+    public void visit(DebugNode node) {
         // leaf node
     }
 

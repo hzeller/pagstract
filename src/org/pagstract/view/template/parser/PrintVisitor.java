@@ -31,6 +31,7 @@ import org.pagstract.view.template.parser.ast.TileNode;
 import org.pagstract.view.template.parser.ast.ValueNode;
 import org.pagstract.view.template.parser.ast.IfVisibleNode;
 import org.pagstract.view.template.parser.ast.ResourceNode;
+import org.pagstract.view.template.parser.ast.DebugNode;
 import org.pagstract.view.template.parser.ast.Visitor;
 
 /**
@@ -120,6 +121,10 @@ public class PrintVisitor implements Visitor {
 
     public void visit(ValueNode node) {
         printContent("VALUE", node);
+    }
+
+    public void visit(DebugNode node) {
+        printContent("DEBUG", node);
     }
 
     public void visit(ResourceNode node) {

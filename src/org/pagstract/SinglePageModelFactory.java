@@ -97,6 +97,7 @@ public class SinglePageModelFactory implements PageModelFactory {
                                             + _modelClass.getName() 
                                             + "' before.");
         }
+        System.err.println("create page model for " + pageModelClass);
         _page = _pageFactory.createPageFor(pageModelClass);
         _modelClass = pageModelClass;
         return _page.getModel();

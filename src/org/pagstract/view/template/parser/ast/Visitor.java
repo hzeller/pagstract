@@ -38,6 +38,9 @@ public interface Visitor {
     void visit(IteratorNode node) throws Exception;
     void visit(SwitchNode node) throws Exception;
     void visit(IfVisibleNode node) throws Exception;
+
+    //-- debugging
+    void visit(DebugNode node) throws Exception;
 }
 
 /* Emacs: 

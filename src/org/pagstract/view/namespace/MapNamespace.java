@@ -45,6 +45,7 @@ public class MapNamespace implements Namespace {
      * returns, whether a given element exists.
      */
     public boolean containsName(String name) {
+        if ("".equals(name)) return true;  // leerer String: wir selbst
         return _map.containsKey(name);
     }
     
@@ -52,6 +53,7 @@ public class MapNamespace implements Namespace {
      * return the namespace with the given Name.
      */
     public Namespace getSubNamespace(String name) {
+        if ("".equals(name)) return this;  // leerer String: wir selbst
         Object object = getNamedObject(name);
         if (object instanceof Namespace) {
             return (Namespace) object;
@@ -117,6 +119,7 @@ public class MapNamespace implements Namespace {
     }
 
     public boolean isNamespace(String name) {
+        if ("".equals(name)) return true; // leerer String: wir selbst
         return isNamespaceObject(getNamedObject(name));
     }
 

@@ -38,6 +38,7 @@ import org.pagstract.view.template.parser.ast.TileNode;
 import org.pagstract.view.template.parser.ast.ValueNode;
 import org.pagstract.view.template.parser.ast.IfVisibleNode;
 import org.pagstract.view.template.parser.ast.ResourceNode;
+import org.pagstract.view.template.parser.ast.DebugNode;
 import org.pagstract.view.template.parser.ast.Visitor;
 import org.pagstract.view.template.parser.scanner.FilePosition;
 
@@ -279,22 +280,23 @@ public class TemplatePageEmitter implements Visitor {
 
     public void visit(IfVisibleNode node) throws Exception {
         final String modelName = node.getModelName();
-        Object value = resolveNamedObject(node);
+        final Object value = resolveNamedObject(node);
 
+        boolean visible = true;
+        
         if (value == null) {
             if (_log.isDebugEnabled()) {
                 writeHiddenMessage("if-visible: empty " + modelName);
             }
-            return;
+            visible = false;
         }
-                
-        if (value instanceof ComponentModel) {
+        else if (value instanceof ComponentModel) {
             ComponentModel model = (ComponentModel) value;
             if (!model.isVisible()) {
                 if (_log.isDebugEnabled()) {
                     writeHiddenMessage("if-visible: invisible component " + modelName);
                 }
-                return;
+                visible = false;
             }
         }
         else if (value.toString().length() == 0) {
@@ -302,10 +304,12 @@ public class TemplatePageEmitter implements Visitor {
             if (_log.isDebugEnabled()) {
                 writeHiddenMessage("if-visible: 0 length " + modelName);
             }
-            return;
+            visible = false;
         }
         
-        node.getTemplateContent().accept(this);
+        if (node.isPositiveBooleanCondition() == visible) {
+            node.getTemplateContent().accept(this);
+        }
     }
 
     public void visit(AnchorNode node) throws Exception {
@@ -349,6 +353,55 @@ public class TemplatePageEmitter implements Visitor {
         if (caseNode != null) {
             caseNode.accept(this);
         }
+    }
+
+    public void visit(DebugNode node) throws Exception {
+        NamingContext ctxt = resolveNameCtxt(node);
+        _out.print("<div class='pagstract-debug'>");
+        printNamespace(ctxt.getNamespace(), ctxt.getName());
+        _out.print("</div>");
+    }
+    
+    private void printNamespace(Namespace ns, String name)
+        throws IOException 
+    {
+        _out.print("<table style='border:1px solid;'>");
+        _out.print("<tr><td colspan='2'>" + name);
+        if (ns.isIteratableObject(name)) {
+            _out.print(" ( pma:list )");
+        }
+        Namespace subNs = null;
+        if (ns.isIteratableObject(name)) {
+            Iterator/*<Namespace>*/ nsit = ns.getNamespaceIterator(name);
+            if (nsit.hasNext()) {
+                subNs = (Namespace) nsit.next();
+            }
+            else {
+                _out.print("..empty");
+            }
+        }
+        else if (ns.isNamespace(name)) {
+            subNs = ns.getSubNamespace(name);
+        }
+  
+        _out.print("</td></tr>");
+
+        if (subNs != null) {
+            Set names = subNs.availableNames();
+            Iterator it = names.iterator();
+            while (it.hasNext()) {
+                String currentName = (String) it.next();
+                _out.print("\n<tr><td>&nbsp;&nbsp;</td><td>");
+                if (subNs.isNamespace(currentName)) {
+                    printNamespace(subNs, currentName);
+                }
+                else {
+                    _out.print(currentName);
+                }
+                _out.print("</td></tr>");
+            }
+        }
+        _out.print("</table>");
     }
 
     private void writeHiddenMessage(String msg) throws IOException {
