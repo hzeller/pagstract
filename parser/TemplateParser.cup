@@ -60,6 +60,7 @@ terminal TemplateToken LinkStart, LinkEnd,
                   ListStart, ListEnd, ListSimple,
                   ListHeaderStart, ListHeaderEnd,
                   ListContentStart, ListContentEnd,
+                  ListNoContentStart, ListNoContentEnd,
                   ListSeparatorStart, ListSeparatorEnd,
                   ListFooterStart, ListFooterEnd,
                   ListGroupStart, ListGroupEnd,
@@ -157,6 +158,8 @@ ListContent ::=
                {: RESULT=new ListSeparatorContent(s); :}
         | ListFooterStart Sequence:s ListFooterEnd
                {: RESULT=new ListFooterContent(s); :}
+        | ListNoContentStart Sequence:s ListNoContentEnd
+               {: RESULT=new ListEmptyContent(s); :}
         ;
          
 BeanTag ::= 

@@ -233,6 +233,10 @@ public class TemplatePageEmitter implements Visitor {
         if (hasAnyContent && node.getFooter() != null) {
             node.getFooter().accept(this);
         }
+
+        if (!hasAnyContent && node.getEmptyContent() != null) {
+            node.getEmptyContent().accept(this);
+        }
     }
 
     public void visit(ValueNode node) throws Exception {

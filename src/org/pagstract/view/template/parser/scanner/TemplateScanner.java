@@ -100,6 +100,8 @@ public class TemplateScanner implements Scanner {
         new BasicToken("</pma:header>",sym.ListHeaderEnd),
         new BasicToken("<pma:content",  sym.ListContentStart, -1, null),
         new BasicToken("</pma:content>",sym.ListContentEnd),
+        new BasicToken("<pma:no-content",  sym.ListNoContentStart, -1, null),
+        new BasicToken("</pma:no-content>",sym.ListNoContentEnd),
         new BasicToken("<pma:footer",  sym.ListFooterStart, -1, null),
         new BasicToken("</pma:footer>",sym.ListFooterEnd),
         new BasicToken("<pma:separator",  sym.ListSeparatorStart, -1, null),

@@ -71,6 +71,14 @@ public final class IteratorNode extends AbstractNamedNode {
         return _contentElements.getSeparator();
     }
 
+    /**
+     * Der content, der angezeigt wird, wenn die Liste
+     * Leer ist.
+     */
+    public TemplateNode getEmptyContent() {
+        return _contentElements.getEmptyContent();
+    }
+
     public TemplateToken getTemplateToken() {
         return _tag;
     }

@@ -24,6 +24,7 @@ public final class ListContentContainer {
     private TemplateNode _separator;
     private TemplateNode _content;
     private TemplateNode _footer;
+    private TemplateNode _emptyContent;
 
     public ListContentContainer(TemplateNode content) {
         _content = content;
@@ -59,6 +60,14 @@ public final class ListContentContainer {
     }
     public TemplateNode getContent() {
         return _content;
+    }
+
+    public void setEmptyContent(TemplateNode node) {
+        checkExists(_emptyContent, node, "no-content");
+        _emptyContent = node;
+    }
+    public TemplateNode getEmptyContent() {
+        return _emptyContent;
     }
 
     public void setFooter(TemplateNode node) {
