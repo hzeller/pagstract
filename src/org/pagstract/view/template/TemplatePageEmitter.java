@@ -460,7 +460,12 @@ public class TemplatePageEmitter implements Visitor {
     }
 
     private void writeHiddenMessage(String msg) throws IOException {
-        _out.print("<!-- " + msg + " -->");
+        /*
+         * should not be displayed, otherwise text-templates will be doomed.
+         */
+        if (System.getProperty("org.pagstract.view.template.DEBUG") != null) {
+            _out.print("<!-- " + msg + " -->");
+        }
     }
 
     private final String resolveResource(String resource, FilePosition pos) {

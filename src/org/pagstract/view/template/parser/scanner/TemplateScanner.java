@@ -352,7 +352,7 @@ public class TemplateScanner implements Scanner {
                     c = _in.read();
                 }
                 while (c >= 0 && c != '"' 
-                       && !Character.isWhitespace(c)
+                       && !Character.isWhitespace((char)c)
                        && c != '<' && c != '&');
 
                 byte[] range = _recordingStream
