@@ -109,7 +109,7 @@ public class TemplateScanner implements Scanner {
         new BasicToken("}",          -1, true),
 
         // that single token must be the last one..
-        (new BasicToken("=\"resource://", sym.ResourceResolver)).setResourceExp()
+        (new BasicToken("=\"resource://",sym.ResourceResolver)).setResourceExp()
     };
 
     private final static TokenMatchPattern MATCH_PATTERN;
@@ -205,7 +205,7 @@ public class TemplateScanner implements Scanner {
             throw new IllegalArgumentException("PAGSTRACT DEVELOPER: there must be an even number of tokens..");
         }
         */
-        _nestedTag = new int[ TOKENS.length / 2 ];
+        _nestedTag = new int[ TOKENS.length+1 / 2 ];
     }
 
     /**
@@ -448,9 +448,9 @@ public class TemplateScanner implements Scanner {
         private final int  _closedSymbol;
         private final String  _magicAttribute;
         private final boolean _isPmaSpecial;
-        private final boolean _isStartSymbol;
         private final boolean _dollarExp;
-        private boolean _resourceExp;
+        private boolean _isStartSymbol = false;
+        private boolean _resourceExp = false;
         
         BasicToken(String keyword) {
             this(keyword, -1, false);
@@ -491,6 +491,7 @@ public class TemplateScanner implements Scanner {
         }
         
         public BasicToken setResourceExp() { 
+            _isStartSymbol = true;
             _resourceExp = true; 
             return this; 
         }

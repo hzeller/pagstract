@@ -59,6 +59,14 @@ public class StreamTokenMatcher {
         while ((ch = in.read()) > 0) {
             boolean previousWasInit = (state == TokenMatchPattern.INIT_STATE);
             state = transStates[state][ch];
+            /* if we just fell back to the init statel, i.e. the character
+             * is not the continuation of some pattern, reconsider the current
+             * character as start of a new token.
+             */
+            if (state == TokenMatchPattern.INIT_STATE && !previousWasInit) {
+                previousWasInit = true; // or in.mark(readAheadMark) ?
+                state = transStates[TokenMatchPattern.INIT_STATE][ch];
+            }
             if (state < 0) {
                 return -state - 1;
             }

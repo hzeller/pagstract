@@ -104,7 +104,8 @@ public class AnchorRenderer implements ComponentRenderer {
                 if (pvalue != null) {
                     result.append( URLEncoder.encode(pvalue));
                 }
-                if( it.hasNext()) {
+
+                if (it.hasNext()) {
                     result.append( "&amp;"  );
                 }
             }

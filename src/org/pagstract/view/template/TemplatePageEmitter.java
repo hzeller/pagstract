@@ -274,12 +274,14 @@ public class TemplatePageEmitter implements Visitor {
     public void visit(IfVisibleNode node) throws Exception {
         final String modelName = node.getModelName();
         Object value = resolveNamedObject(node);
+
         if (value == null) {
             if (_log.isDebugEnabled()) {
                 writeHiddenMessage("if-visible: empty " + modelName);
             }
             return;
         }
+                
         if (value instanceof ComponentModel) {
             ComponentModel model = (ComponentModel) value;
             if (!model.isVisible()) {
@@ -289,6 +291,14 @@ public class TemplatePageEmitter implements Visitor {
                 return;
             }
         }
+        else if (value.toString().length() == 0) {
+            // leerer string ist ja in der Form auch nicht sichtbar.
+            if (_log.isDebugEnabled()) {
+                writeHiddenMessage("if-visible: 0 length " + modelName);
+            }
+            return;
+        }
+        
         node.getTemplateContent().accept(this);
     }
 
