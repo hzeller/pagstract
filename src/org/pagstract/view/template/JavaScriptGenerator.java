@@ -28,6 +28,7 @@ import org.pagstract.view.template.parser.ast.SwitchNode;
 import org.pagstract.view.template.parser.ast.TemplateNode;
 import org.pagstract.view.template.parser.ast.TileNode;
 import org.pagstract.view.template.parser.ast.ValueNode;
+import org.pagstract.view.template.parser.ast.IfVisibleNode;
 import org.pagstract.view.template.parser.ast.Visitor;
 import org.pagstract.view.template.parser.scanner.FilePosition;
 import org.pagstract.view.template.parser.scanner.TemplateToken;
@@ -235,6 +236,10 @@ public class JavaScriptGenerator implements Visitor {
     }
 
     public void visit(SelectFieldNode node) throws Exception {
+        writeFunctionParam();
+    }
+
+    public void visit(IfVisibleNode node) throws Exception {
         writeFunctionParam();
     }
 

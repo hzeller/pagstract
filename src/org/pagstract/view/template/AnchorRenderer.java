@@ -25,11 +25,15 @@ import org.pagstract.view.template.parser.ast.TemplateNode;
 import org.pagstract.view.template.parser.ast.Visitor;
 import org.pagstract.view.template.parser.scanner.TemplateToken;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * A Component Renderer is used in the TemplatePageEmitter to write
  * out components.
  */
 public class AnchorRenderer implements ComponentRenderer {
+    private static final Log _log = LogFactory.getLog(AnchorRenderer.class);
 
     private static final byte[] s_a_href     = "<a href=\"".getBytes();
     private static final byte[] s_questmark  = "?".getBytes();
@@ -90,9 +94,16 @@ public class AnchorRenderer implements ComponentRenderer {
                 result.append(requireQuestMark ? "?" : "&amp;");
             }
             while( it.hasNext()) {
-                String pname= (String) it.next();
+                final String pname= (String) it.next();
+                if (pname == null) {
+                    _log.error("<null> parameter name in action " + action);
+                    continue;
+                }
+                final String pvalue = action.getParameter(pname);
                 result.append(pname).append("=");
-                result.append( URLEncoder.encode(action.getParameter(pname)));
+                if (pvalue != null) {
+                    result.append( URLEncoder.encode(pvalue));
+                }
                 if( it.hasNext()) {
                     result.append( "&amp;"  );
                 }
@@ -113,9 +124,6 @@ public class AnchorRenderer implements ComponentRenderer {
             actionUrl = value.toString();
         }
 
-        /* FIXME hier noch die css-class und andere properties aus dem
-         * tag übernehmen.
-         */
         if (enabled) {
             out.write( s_a_href );
             out.print( actionUrl );

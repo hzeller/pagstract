@@ -30,6 +30,8 @@ import org.pagstract.view.template.parser.scanner.TemplateToken;
  * Writes an HTML input field.
  */
 public class InputFieldRenderer implements ComponentRenderer {
+    private static final byte[] s_textarea      = "<textarea".getBytes();
+    private static final byte[] s_end_textarea  = "</textarea>".getBytes();
     private static final byte[] s_input         = "<input".getBytes();
     private static final byte[] s_name_eq       = " name=\"".getBytes();
     private static final byte[] s_value_eq      = " value=\"".getBytes();
@@ -37,6 +39,7 @@ public class InputFieldRenderer implements ComponentRenderer {
     private static final byte[] s_quot_space    = "\" ".getBytes();
     private static final byte[] s_equals_quot   = "=\"".getBytes();
     private static final byte[] s_close_tag     = "/>".getBytes();
+    private static final byte[] s_simple_close_tag = ">".getBytes();
     private static final byte[] s_checked       = " checked=\"checked\" ".getBytes();
     private static final byte[] s_readonly   = " readonly=\"readonly\" ".getBytes();
     private static final byte[] s_disabled   = " disabled=\"disabled\" ".getBytes();
@@ -104,9 +107,14 @@ public class InputFieldRenderer implements ComponentRenderer {
             ((TemplatePageEmitter)renderVisitor).addUsedInputFieldName(inputName);
         }
 
-        out.write( s_input );
+        final String inputType = (isVisible 
+                                  ? origTag.getAttribute("type") 
+                                  : "hidden");
+        final boolean isTextarea = "textarea".equals(inputType);
+
+        out.write( isTextarea ? s_textarea : s_input );
         
-        if (true || isEnabled) {
+        if (true || isEnabled) { // for now, we always need the name
             out.write( s_name_eq );
             out.print( inputName );
             out.write( s_quot_space );
@@ -115,9 +123,9 @@ public class InputFieldRenderer implements ComponentRenderer {
         /*
          * checkbox/radio-buttons
          */
-        String inputType = isVisible ? origTag.getAttribute("type") : "hidden";
-        boolean checkableInput = ("checkbox".equals(inputType) 
-                                  || "radio".equals(inputType));
+        final boolean checkableInput = ("checkbox".equals(inputType) 
+                                        || "radio".equals(inputType));
+        
         /*
          * FIXME: if we rewrite this to hidden, then only _one_
          * variable for checkableInputs must be emitted.
@@ -127,18 +135,20 @@ public class InputFieldRenderer implements ComponentRenderer {
         out.print(inputType);
         out.write(s_quot_space);
 
-        if (checkableInput) {
-            String templateValue = origTag.getAttribute("value");
-            if (value.equals(templateValue)) {
-                out.write( s_checked );
+        if (!isTextarea) {
+            if (checkableInput) {
+                String templateValue = origTag.getAttribute("value");
+                if (value.equals(templateValue)) {
+                    out.write( s_checked );
+                }
+            } 
+            else {  /* text input */
+                out.write( s_value_eq );
+                if (value != null) {
+                    Utils.quote( out, value.toString());
+                }
+                out.write( s_quot_space );
             }
-        } 
-        else {  /* text input */
-            out.write( s_value_eq );
-            if (value != null) {
-                Utils.quote( out, value.toString());
-            }
-            out.write( s_quot_space );
         }
         
         if (!isEnabled) {
@@ -155,7 +165,16 @@ public class InputFieldRenderer implements ComponentRenderer {
         appendAttributes(out, alreadyWritten, attributeSet);
         appendAttributes(out, alreadyWritten, origTag);
 
-        out.write( s_close_tag );
+        if (!isTextarea) {
+            out.write( s_close_tag );
+        }
+        else {
+            out.write( s_simple_close_tag );
+            if (value != null) {
+                Utils.quote( out, value.toString());
+            }
+            out.write( s_end_textarea );
+        }
     }
 
     private void appendAttributes(Device out, Set alreadyWritten, 

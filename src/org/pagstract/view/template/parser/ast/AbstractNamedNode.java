@@ -17,7 +17,7 @@ import org.pagstract.view.template.parser.scanner.FilePosition;
 /**
  * Many nodes have a corresponding name in the model
  */
-public abstract class AbstractNamedNode implements TemplateNode {
+public abstract class AbstractNamedNode implements NamedTemplateNode {
     private final String _modelName;
     private final FilePosition _filePosition;
 

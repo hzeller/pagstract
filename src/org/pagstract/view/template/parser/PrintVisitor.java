@@ -29,6 +29,7 @@ import org.pagstract.view.template.parser.ast.SwitchNode;
 import org.pagstract.view.template.parser.ast.TemplateNode;
 import org.pagstract.view.template.parser.ast.TileNode;
 import org.pagstract.view.template.parser.ast.ValueNode;
+import org.pagstract.view.template.parser.ast.IfVisibleNode;
 import org.pagstract.view.template.parser.ast.Visitor;
 
 /**
@@ -70,6 +71,10 @@ public class PrintVisitor implements Visitor {
 
     public void visit(BeanNode node) throws Exception {
         printContent("BEAN", node);
+    }
+
+    public void visit(IfVisibleNode node) throws Exception {
+        printContent("IF-VISIBLE", node);
     }
 
     public void visit(ConstantNode node) {

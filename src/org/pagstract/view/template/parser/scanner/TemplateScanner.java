@@ -56,7 +56,8 @@ public class TemplateScanner implements Scanner {
         
         /* our tags. Note, that closing tags MUST follow their opening
          * counterparts (_nestedTag logic..). Opening tags MUST be
-         * on even positions, the closing part on the following odd position.
+         * on even positions in the following list, the closing part on 
+         * the following odd position.
          */
         new BasicToken("<pma:value ",  sym.ValueStart, sym.ValueSimple,
                        "pma:name"),
@@ -65,10 +66,14 @@ public class TemplateScanner implements Scanner {
         new BasicToken("</pma:list>",  sym.ListEnd),
         new BasicToken("<pma:bean ",   sym.BeanStart,  -1, "pma:name"),
         new BasicToken("</pma:bean>",  sym.BeanEnd),
+        new BasicToken("<pma:if-visible ",sym.IfVisibleStart,  -1, "pma:name"),
+        new BasicToken("</pma:if-visible>",sym.IfVisibleEnd),
         new BasicToken("<pma:switch ", sym.SwitchStart, -1, "pma:name"),
         new BasicToken("</pma:switch>",sym.SwitchEnd),
         new BasicToken("<pma:form ",   sym.FormStart, -1, "pma:name"),
         new BasicToken("</pma:form>",  sym.FormEnd),
+        new BasicToken("<form ",   sym.FormStart, -1, "pma:name"),
+        new BasicToken("</form>",  sym.FormEnd),
         new BasicToken("<pma:tile ",  sym.TileStart,sym.TileSimple, null),
         new BasicToken("</pma:tile>",  sym.TileEnd),
         new BasicToken("<a ",          sym.LinkStart, -1, "pma:name"),

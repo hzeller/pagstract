@@ -36,6 +36,7 @@ public interface Visitor {
     //-- control structures
     void visit(IteratorNode node) throws Exception;
     void visit(SwitchNode node) throws Exception;
+    void visit(IfVisibleNode node) throws Exception;
 }
 
 /* Emacs: 

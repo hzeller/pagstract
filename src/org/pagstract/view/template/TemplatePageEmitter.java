@@ -19,9 +19,11 @@ import java.util.Set;
 
 import org.pagstract.io.Device;
 import org.pagstract.model.SingleValueModel;
+import org.pagstract.model.ComponentModel;
 import org.pagstract.view.namespace.NameResolver;
 import org.pagstract.view.namespace.Namespace;
 import org.pagstract.view.namespace.NamingContext;
+import org.pagstract.view.template.parser.ast.NamedTemplateNode;
 import org.pagstract.view.template.parser.ast.AnchorNode;
 import org.pagstract.view.template.parser.ast.BeanNode;
 import org.pagstract.view.template.parser.ast.ConstantNode;
@@ -34,6 +36,7 @@ import org.pagstract.view.template.parser.ast.SwitchNode;
 import org.pagstract.view.template.parser.ast.TemplateNode;
 import org.pagstract.view.template.parser.ast.TileNode;
 import org.pagstract.view.template.parser.ast.ValueNode;
+import org.pagstract.view.template.parser.ast.IfVisibleNode;
 import org.pagstract.view.template.parser.ast.Visitor;
 
 import org.apache.commons.logging.Log;
@@ -116,7 +119,7 @@ public class TemplatePageEmitter implements Visitor {
          */
         final String modelName = node.getModelName();
         if (modelName != null) {
-            Object value = _nameResolver.resolveName(modelName);
+            Object value = resolveNamedObject(node);
             if (value != null) {
                 resourceName = value.toString();
             }
@@ -141,12 +144,12 @@ public class TemplatePageEmitter implements Visitor {
             resourceNode.accept(this);
         }
         catch (InvocationTargetException ie) {
-            _out.print("<!--" + ie.getMessage() + ": "
-                       + ie.getTargetException() + "-->");
+            writeHiddenMessage(ie.getMessage() + ": "
+                               + ie.getTargetException());
             _log.error("Exception rendering", ie);
         }
         catch (Exception e) {
-            _out.print("<!-- " + e.getMessage() + " -->");
+            writeHiddenMessage(e.getMessage());
             _log.error("Exception rendering", e);
         }
     }
@@ -156,7 +159,11 @@ public class TemplatePageEmitter implements Visitor {
     }
 
     public void visit(IteratorNode node) throws Exception {
-        NamingContext ctxt = _nameResolver.resolveNameContext(node.getModelName());
+        NamingContext ctxt = resolveNameCtxt(node);
+        if (ctxt == null) {
+            return;
+        }
+
         Namespace ctxtNs = ctxt.getNamespace();
         if (!ctxtNs.isIteratableObject(ctxt.getName())) {
             throw new IOException("Not iteratable: " + node.getModelName()
@@ -218,13 +225,26 @@ public class TemplatePageEmitter implements Visitor {
 
     public void visit(ValueNode node) throws Exception {
         ComponentRenderer renderer = new ValueRenderer();
-        Object value = _nameResolver.resolveName(node.getModelName());
+        Object value = resolveNamedObject(node);
         renderer.render(this, node, value, _out);
     }
 
     public void visit(BeanNode node) throws Exception {
-        NamingContext ctxt = _nameResolver.resolveNameContext(node.getModelName());
+        NamingContext ctxt = resolveNameCtxt(node);
+        if (ctxt == null) {
+            return;
+        }
+
+        if (ctxt.getNamespace().getNamedObject(ctxt.getName()) == null) {
+            if (_log.isDebugEnabled()) {
+                writeHiddenMessage("not displayed null-bean '" 
+                                   + node.getModelName() + "'");
+            }
+            return;
+        }
+
         _nameResolver.pushNamespace(ctxt.getNamespace().getSubNamespace(ctxt.getName()));
+        
         try {
             TemplateNode content = node.getTemplateContent();
             if (content != null) {
@@ -236,34 +256,55 @@ public class TemplatePageEmitter implements Visitor {
         }
     }
 
+    public void visit(IfVisibleNode node) throws Exception {
+        final String modelName = node.getModelName();
+        Object value = resolveNamedObject(node);
+        if (value == null) {
+            if (_log.isDebugEnabled()) {
+                writeHiddenMessage("if-visible: empty " + modelName);
+            }
+            return;
+        }
+        if (value instanceof ComponentModel) {
+            ComponentModel model = (ComponentModel) value;
+            if (!model.isVisible()) {
+                if (_log.isDebugEnabled()) {
+                    writeHiddenMessage("if-visible: invisible component " + modelName);
+                }
+                return;
+            }
+        }
+        node.getTemplateContent().accept(this);
+    }
+
     public void visit(AnchorNode node) throws Exception {
         ComponentRenderer renderer = new AnchorRenderer(_urlProvider);
-        Object value = _nameResolver.resolveName(node.getModelName());
+        Object value = resolveNamedObject(node);
         renderer.render(this, node, value, _out);
     }
 
     public void visit(FormNode node) throws Exception {
         ComponentRenderer renderer = new FormRenderer(_urlProvider);
-        Object value = _nameResolver.resolveName(node.getModelName());
+        Object value = resolveNamedObject(node);
         renderer.render(this, node, value, _out);
     }
 
     public void visit(InputFieldNode node) throws Exception {
         String suffix = _nameResolver.determineInputfieldSuffix();
         ComponentRenderer renderer = new InputFieldRenderer(suffix);
-        Object value = _nameResolver.resolveName(node.getModelName());
+        Object value = resolveNamedObject(node);
         renderer.render(this, node, value, _out);
     }
 
     public void visit(SelectFieldNode node) throws Exception {
         String suffix = _nameResolver.determineInputfieldSuffix();
         ComponentRenderer renderer = new SelectFieldRenderer(suffix);
-        Object value = _nameResolver.resolveName(node.getModelName());
+        Object value = resolveNamedObject(node);
         renderer.render(this, node, value, _out);
     }
 
     public void visit(SwitchNode node) throws Exception {
-        Object value = _nameResolver.resolveName(node.getModelName());
+        Object value = resolveNamedObject(node);
 
         String matchValue = null;
         if ( value instanceof SingleValueModel ) {
@@ -278,6 +319,38 @@ public class TemplatePageEmitter implements Visitor {
             caseNode.accept(this);
         }
     }
+
+    private void writeHiddenMessage(String msg) throws IOException {
+        _out.print("<!-- " + msg + " -->");
+    }
+
+    private final Object resolveNamedObject(NamedTemplateNode node) 
+        throws IOException 
+    {
+        try {
+            return _nameResolver.resolveName(node.getModelName());
+        }
+        catch (Exception e) {
+            writeHiddenMessage("problem resolving '" +node.getModelName()+"'");
+            _log.error("at " + node.getPosition(), e);
+        }
+        return null;
+    }
+
+    
+    private final NamingContext resolveNameCtxt(NamedTemplateNode node) 
+        throws IOException 
+    {
+        try {
+            return _nameResolver.resolveNameContext(node.getModelName());
+        }
+        catch (Exception e) {
+            writeHiddenMessage("problem resolving '" +node.getModelName()+"'");
+            _log.error("at " + node.getPosition(), e);
+        }
+        return null;
+    }
+
 }
 
 /* Emacs: 

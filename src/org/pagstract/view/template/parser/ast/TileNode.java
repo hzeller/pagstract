@@ -18,7 +18,7 @@ import org.pagstract.view.template.parser.scanner.FilePosition;
  * A node for an include. It allows to either include a static
  * file or a file that is given by the model names' value.
  */
-public final class TileNode  implements TemplateNode {
+public final class TileNode  implements NamedTemplateNode {
     private final String _filename;
     private final String _modelName;
     private final FilePosition _filePosition;

@@ -17,10 +17,9 @@ import org.pagstract.view.template.parser.scanner.TemplateToken;
 public final class BeanNode extends AbstractTemplateContentNode {
     private final TemplateToken    _tag;
 
-    public BeanNode( String model_name, TemplateNode content,
-                     TemplateToken tag) 
+    public BeanNode( TemplateToken tag, TemplateNode content)
     {
-        super(model_name, content, tag.getFilePosition());
+        super(tag.getModelName(), content, tag.getFilePosition());
         _tag = tag;
     }
 

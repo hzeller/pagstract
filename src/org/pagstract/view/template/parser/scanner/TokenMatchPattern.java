@@ -67,7 +67,7 @@ public final class TokenMatchPattern {
         }
     }
 
-    private TokenMatchPattern(short states[][] ) {
+    private TokenMatchPattern(short states[][]) {
         _transitionStates = states;
     }
 

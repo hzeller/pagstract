@@ -44,6 +44,11 @@ public class ValueRenderer implements ComponentRenderer {
         else {
             renderText = value.toString();
         }
+
+        if (renderText == null) {
+            out.print("<!-- " + valNode.getModelName() + ": null -->");
+        }
+
         if (valNode.writeAsRaw()) {
             out.print(renderText);
         }

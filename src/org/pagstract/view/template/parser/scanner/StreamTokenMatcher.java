@@ -50,7 +50,7 @@ public class StreamTokenMatcher {
      */
     public int nextToken(int readAheadMark) throws IOException {
         // local variable access is faster..
-        short transStates[/*state*/][/*input-char*/] = _pattern.getStates();
+        final short transStates[/*state*/][/*input-char*/] = _pattern.getStates();
         InputStream in = _stream;
 
         int state = TokenMatchPattern.INIT_STATE;
