@@ -22,7 +22,7 @@ public final class TokenMatchPattern {
     final static short INIT_STATE  =  0;
 
     final short/*nextState*/ _transitionStates[/*currState*/][/*input-char*/];
-    
+   
     /**
      * Compile a set of Tokens to the TokenMatch pattern.
      */

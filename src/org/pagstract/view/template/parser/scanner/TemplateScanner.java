@@ -94,6 +94,7 @@ public class TemplateScanner implements Scanner {
         new BasicToken("</pma:footer>",sym.ListFooterEnd),
         new BasicToken("<pma:separator",  sym.ListSeparatorStart, -1, null),
         new BasicToken("</pma:separator>",sym.ListSeparatorEnd),
+        // FIXME: form missing.
 
         // these are handled special..
         new BasicToken("${",         sym.ValueSimple, true),

@@ -54,6 +54,7 @@ public class TemplateToken {
         return getAttribute("filename");
     }
     
+    // FIXME: should not be here..
     public String getRaw() {
         return getAttribute("raw");
     }
