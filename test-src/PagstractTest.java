@@ -124,6 +124,11 @@ public class PagstractTest extends TestCase {
         assertEquals("<a href=\"" + url + "\" title=\"MESSAGE\">foo</a>", exec.render());
     }
 
+    public void test_comment() throws Exception {
+        TemplateExecutor exec = new TemplateExecutor("foo<%-- bar --%>baz");
+        assertEquals("foobaz", exec.render());
+    }
+
     /**
      * a Resource-Resolver, that resolves the only resource 'foo' to
      * 'MESSAGE'
