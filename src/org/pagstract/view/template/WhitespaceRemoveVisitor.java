@@ -33,25 +33,7 @@ import org.pagstract.view.template.parser.ast.Visitor;
 /**
  * removes all unnecessary whitespace in constant nodes.
  */
-public class WhitespaceRemoveVisitor implements Visitor {
-    public void visit(NodeSequence node) throws Exception {
-        Iterator it = node.getElements();
-        while (it.hasNext()) {
-            TemplateNode subnode = (TemplateNode) it.next();
-            subnode.accept(this);
-        }
-    }
-
-    public void visit(TileNode node) throws Exception {
-    }
-
-    public void visit(AnchorNode node) throws Exception {
-        node.getTemplateContent().accept(this);
-    }
-
-    public void visit(BeanNode node) throws Exception {
-        node.getTemplateContent().accept(this);
-    }
+public class WhitespaceRemoveVisitor extends RecursiveDescendVisitor {
 
     private final boolean isNewline(byte b) {
         return (b == '\n' || b == '\r');
@@ -89,55 +71,18 @@ public class WhitespaceRemoveVisitor implements Visitor {
                 break;
             }
         }
+
+        /* collapse all whitespaces to one. If there has been any
+         * newline in the sequence of whitespaces, then use a newline.
+         * Thus, the general structure of the file still looks almost good.
+         */
         if (state == 1) {
             source[outPos++] = (byte) (containsNewline ? '\n' : ' ');
         }
+
         byte[] dest = new byte [ outPos ];
         System.arraycopy(source, 0, dest, 0, outPos);
         node.replaceContentBuffer(dest);
-    }
-
-    public void visit(FormNode node) throws Exception {
-        node.getTemplateContent().accept(this);
-    }
-
-    public void visit(InputFieldNode node) {
-    }
-
-    public void visit(IteratorNode node) throws Exception {
-        acceptNonNull(node.getHeader());
-        acceptNonNull(node.getContent());
-        acceptNonNull(node.getSeparator());
-        acceptNonNull(node.getFooter());
-    }
-
-    public void visit(SelectFieldNode node) {
-    }
-
-    public void visit(SwitchNode node) throws Exception {
-        acceptNonNull(node.getDefaultContent());
-        Iterator it = node.getAvailableNames().iterator();
-        while (it.hasNext()) {
-            String value = (String) it.next();
-            TemplateNode content = node.getNamedContent(value);
-            content.accept(this);
-        }
-    }
-
-    public void visit(ValueNode node) {
-    }
-
-    public void visit(ResourceNode node) {
-    }
-
-    public void visit(IfVisibleNode node) throws Exception {
-        node.getTemplateContent().accept(this);
-    }
-
-    private void acceptNonNull(TemplateNode node) throws Exception {
-        if (node != null) {
-            node.accept(this);
-        }
     }
 }
 
