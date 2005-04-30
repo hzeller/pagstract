@@ -102,7 +102,7 @@ public class FormRenderer implements ComponentRenderer {
             // write out the action
             String url = action.getUrl();
             if (_urlProvider != null) {
-                url = _urlProvider.resolveUrl(action, url);
+                url = _urlProvider.resolveUrl(action, url, true);
             }           
             if (url != null) {
                 out.write( s_action );

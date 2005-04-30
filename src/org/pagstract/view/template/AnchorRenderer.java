@@ -65,7 +65,7 @@ public class AnchorRenderer implements ComponentRenderer {
         Iterator it= action.getParameterNames();
         String url = action.getUrl();
         if (urlProvider != null) {
-            url = urlProvider.resolveUrl(action, url);
+            url = urlProvider.resolveUrl(action, url, false);
         }
         boolean requireQuestMark = true;
         if (url != null) {

@@ -19,5 +19,10 @@ import org.pagstract.model.ActionModel;
  * URL that is rendered into the Page.
  */
 public interface ActionUrlProvider {
-    String resolveUrl(ActionModel actionModel, String url);
+    /**
+     * @param actionModel the action model whose action-URL is to be written.
+     * @param url the URL to be encoded
+     * @param formContext true, if this URL is encoded in form context.
+     */
+    String resolveUrl(ActionModel actionModel, String url, boolean formContext);
 }
