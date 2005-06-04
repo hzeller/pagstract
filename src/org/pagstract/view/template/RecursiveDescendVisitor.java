@@ -51,7 +51,7 @@ public class RecursiveDescendVisitor implements Visitor {
     }
 
     public void visit(AnchorNode node) throws Exception {
-        node.getTemplateContent().accept(this);
+        acceptNonNull(node.getTemplateContent());
     }
 
     public void visit(BeanNode node) throws Exception {
