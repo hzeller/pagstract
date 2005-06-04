@@ -96,7 +96,7 @@ public class TemplateScanner implements Scanner {
                        "pma:name"),
         new BasicToken("</textarea>",  sym.TextaraEnd),
         */
-        new BasicToken("<object ",     sym.ObjectStart, -1, "pma:case"),
+        new BasicToken("<object",     sym.ObjectStart, -1, "pma:case"),
         new BasicToken("</object>",    sym.ObjectEnd),
         new BasicToken("<pma:header",  sym.ListHeaderStart, -1, null),
         new BasicToken("</pma:header>",sym.ListHeaderEnd),
@@ -171,6 +171,11 @@ public class TemplateScanner implements Scanner {
     private final int _nestedTag[];
 
     /**
+     * count nested <object></object> within pma-<object pma:case="...">
+     */
+    private int _nestedObjectTag;
+
+    /**
      * maximum number of latest symbols seen.
      */
     private final static int MAX_BACKTRACE = 5;
@@ -230,6 +235,7 @@ public class TemplateScanner implements Scanner {
         }
         */
         _nestedTag = new int[ TOKENS.length+1 / 2 ];
+        _nestedObjectTag = 0;
     }
 
     /**
@@ -428,6 +434,7 @@ public class TemplateScanner implements Scanner {
                                   + magicAttribute
                                   + " attribute");
                         }
+                        
                         FilePosition pos = new FilePosition(_resourceName,
                                                             tagStartPos);
                         templateToken = new TemplateToken(pos, attributeMap);
@@ -448,22 +455,35 @@ public class TemplateScanner implements Scanner {
                          * find dollar expansions in attributes.
                          */
                         _in.reset();
+
+                        /*
+                         * <object> is a tag, that can occur in normal
+                         * HTML-files nested within pma:case object tags.
+                         */
+                        if ("<object".equals(token.getKeyword())) {
+                            _nestedObjectTag++;
+                        }
                     }
                 }
                 else { // end token..
-                    int startCount = _nestedTag[tokenNum / 2];
-                    if (startCount > 0) {
-                        _nextSymbol = new Symbol( token.getSymbol() );
-                        traceSymbol(token.getKeyword(),
-                                    new FilePosition(_resourceName,
-                                                     tagStartPos));
-                        _nestedTag[tokenNum / 2]--;
-                        popOpenSymbol();
+                    if (_nestedObjectTag > 0 && "</object>".equals(token.getKeyword())) {
+                        _nestedObjectTag--;
                     }
-                    if (token.isPmaSpecial() && startCount == 0) {
-                        error(tagStartPos, "closing special tag '"
-                              + token.getKeyword() 
-                              + "' that has not been opened");
+                    else {
+                        int startCount = _nestedTag[tokenNum / 2];
+                        if (startCount > 0) {
+                            _nextSymbol = new Symbol( token.getSymbol() );
+                            traceSymbol(token.getKeyword(),
+                                        new FilePosition(_resourceName,
+                                                         tagStartPos));
+                            _nestedTag[tokenNum / 2]--;
+                            popOpenSymbol();
+                        }
+                        if (token.isPmaSpecial() && startCount == 0) {
+                            error(tagStartPos, "closing special tag '"
+                                  + token.getKeyword() 
+                                  + "' that has not been opened");
+                        }
                     }
                 }
             }
