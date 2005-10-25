@@ -1,3 +1,5 @@
+package org.pagstract.test;
+
 public class FooBean {
     private final String _value;
     FooBean(String value) {

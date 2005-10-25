@@ -236,7 +236,7 @@ public class TemplatePageEmitter implements Visitor {
                 _nameResolver.popNamespace();
                 _nameResolver.popIteratorIndex();
             }
-            if (separator != null && nsIt.hasNext()) {
+            if (separator != null && nsIt.hasNext() && (max < 0 || index+1 < max)) {
                 separator.accept(this);
             }
         }

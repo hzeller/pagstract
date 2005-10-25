@@ -182,7 +182,7 @@ public class JSTemplatePageEmitter extends TemplatePageEmitter {
                 _nameResolver.popNamespace();
                 _nameResolver.popIteratorIndex();
             }
-            if (separator != null && nsIt.hasNext()) {
+            if (separator != null && nsIt.hasNext() && (max < 0 || index+1 < max)) {
                 separator.accept(this);
             }
         }

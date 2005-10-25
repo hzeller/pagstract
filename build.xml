@@ -2,7 +2,7 @@
 <project name="Pagstract - web application view model"
          default="compile" basedir=".">
      <!-- properties -->
-     <property name="version"              value="0.46" />
+     <property name="version"              value="0.48-dev" />
      <property name="src"                  value="src" />
      <property name="bin"                  value="bin" />
      <property name="lib"                  value="lib" />
@@ -156,7 +156,7 @@
 
     <target name="junit-test" depends="junit-compile" 
 	    description="executes junit tests">
-        <junit fork="yes" haltonfailure="no" printsummary="on" showoutput="false">
+        <junit fork="yes" haltonfailure="no" printsummary="on" showoutput="on">
             <classpath>
                 <fileset refid="build.libs"/>
                 <pathelement location="${build.classes}"/>

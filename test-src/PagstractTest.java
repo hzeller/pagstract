@@ -10,6 +10,7 @@
  *
  * Please see COPYING for the complete licence.
  */
+package org.pagstract.test;
 
 import junit.framework.TestCase;
 
@@ -92,6 +93,22 @@ public class PagstractTest extends TestCase {
                          +"<pma:separator></pma:separator>"
                          +"<pma:footer></pma:footer></pma:list>", 
                          "HZ");
+
+        // separator inbetween
+        listTemplateTest("<pma:list pma:name='listValue'>"
+                         +"<pma:header></pma:header>"
+                         +"<pma:content><pma:value pma:name='.foo'/></pma:content>"
+                         +"<pma:separator>,</pma:separator>"
+                         +"<pma:footer></pma:footer></pma:list>", 
+                         "H,Z");
+
+        // no separator at end of list
+        listTemplateTest("<pma:list pma:name='listValue' count='1'>"
+                         +"<pma:header></pma:header>"
+                         +"<pma:content><pma:value pma:name='.foo'/></pma:content>"
+                         +"<pma:separator>,</pma:separator>"
+                         +"<pma:footer></pma:footer></pma:list>", 
+                         "H");
     }
 
     public void test_action() throws Exception {
@@ -127,6 +144,16 @@ public class PagstractTest extends TestCase {
     public void test_comment() throws Exception {
         TemplateExecutor exec = new TemplateExecutor("foo<%-- bar --%>baz");
         assertEquals("foobaz", exec.render());
+    }
+
+    public void test_nestedObject() throws Exception {
+        TemplateExecutor exec = new TemplateExecutor("<pma:switch pma:name='stringValue'>bar<object pma:case='foo-p'><object x='y'>foo</object></object></pma:switch>");
+        exec.getModel().setStringValue("foo-p");
+        assertEquals("<object x='y'>foo</object>", exec.render());
+
+        exec = new TemplateExecutor("<pma:switch pma:name='stringValue'>bar<object pma:case='foo-p'><object>foo</object></object></pma:switch>");
+        exec.getModel().setStringValue("foo-p");
+        assertEquals("<object>foo</object>", exec.render());
     }
 
     /**

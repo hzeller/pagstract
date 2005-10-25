@@ -1,3 +1,5 @@
+package org.pagstract.test;
+
 import org.pagstract.PageModel;
 import org.pagstract.model.ActionModel;
 import org.pagstract.model.ComboboxModel;
