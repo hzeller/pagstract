@@ -36,7 +36,9 @@ public class PathRewritingTemplateResolver implements TemplateResolver {
     public TemplateNode resolveTemplate(String resourceName) throws Exception {
         resourceName = PathUtil.normalizePath(resourceName);
         String rewritten = _resourceResolver.resolveResource(resourceName);
-        _log.debug("rewrite '" + resourceName + "' to '" + rewritten + "'");
+        if (_log.isDebugEnabled()) {
+            _log.debug("rewrite '" + resourceName + "' to '" + rewritten + "'");
+        }
         return _deligee.resolveTemplate(rewritten);
     }
 

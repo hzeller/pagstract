@@ -50,13 +50,14 @@ final class PathUtil {
      * If ../ go beyond root, just make it absoulte.
      */
     static String normalizePath(String file) {
-        StringBuffer result = new StringBuffer();
+        if (file == null) return null;
+        final int len = file.length();
+        StringBuffer result = new StringBuffer(len);
         int lastSlash = 0;
         // if we start with './' -> remove; with '../' -> make absolute: '/'
         while (file.startsWith("./") || file.startsWith("../")) {
             file = file.substring(2);
         }
-        final int len = file.length();
         int i = 0;
         while (i < len) {
             if (file.charAt(i) == '/') {

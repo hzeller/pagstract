@@ -79,11 +79,11 @@ public class BeanNamespace extends ClassNamespace {
         try {
             return getter.invoke( _bean, EMPTY_PARAM_LIST );
         }
-        catch (RuntimeException e) {
-            throw e;
-        }
         catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("while invoking getter '" + name 
+                                       + "' on bean "
+                                       + _bean 
+                                       + " (class " + _namespaceClass + ")", e);
         }
     }
 
