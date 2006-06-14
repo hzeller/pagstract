@@ -203,7 +203,7 @@ SwitchTag ::=
         ;
 
 CaseList ::= 
-          CaseList:l ObjectStart:o Sequence:s ObjectEnd IgnoredBytes
+          CaseList:l ObjectStart:o OptionalSequence:s ObjectEnd IgnoredBytes
                  {: l.put( o.getTagCaseValue(), s); RESULT= l; :}
         | /* epsilon */ {: RESULT= new HashMap(); :} 
         ;

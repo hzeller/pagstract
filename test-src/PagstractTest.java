@@ -156,6 +156,13 @@ public class PagstractTest extends TestCase {
         assertEquals("<object>foo</object>", exec.render());
     }
 
+    public void test_emptySwitchElements() throws Exception {
+        TemplateExecutor exec = new TemplateExecutor("<pma:switch pma:name='stringValue'>bar<object pma:case='foo-p'></object></pma:switch>");
+        exec.getModel().setStringValue("foo-p");
+        assertEquals("", exec.render());
+    }
+
+
     /**
      * a Resource-Resolver, that resolves the only resource 'foo' to
      * 'MESSAGE'
